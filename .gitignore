@@ -1,0 +1,8 @@
+.env
+.env.local
+*.pyc
+__pycache__/
+.DS_Store
+docs/
+docs-chunk-*/
+_raw_frames/
