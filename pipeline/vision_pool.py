@@ -24,8 +24,9 @@ from typing import List
 def load_env():
     """Load API keys from .env files into environment."""
     env_files = [
-        "/Users/parthnaria/Documents/Claude/memory/.env",
-        "/Users/parthnaria/Documents/Claude/yt-deep-knowledge/_pipeline/.env",
+        os.path.expanduser("~/Documents/Claude/memory/.env"),
+        os.path.expanduser("~/Documents/Claude/yt-deep-knowledge/_pipeline/.env"),
+        "_pipeline/.env",
     ]
     for ef in env_files:
         if not os.path.exists(ef):

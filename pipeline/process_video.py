@@ -13,11 +13,11 @@ import argparse, asyncio, base64, json, os, re, shutil, subprocess, sys, time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-OUTPUT_ROOT = Path("/Users/parthnaria/Documents/Claude/yt-deep-knowledge")
+OUTPUT_ROOT = Path(os.environ.get("OUTPUT_ROOT") or "docs")
 TMP_ROOT = Path("/tmp/yt-deep-knowledge")
 TMP_ROOT.mkdir(parents=True, exist_ok=True)
 
-WHISPER_BIN = "/opt/homebrew/bin/whisper-cli"
+WHISPER_BIN = os.environ.get("WHISPER_BIN") or ("/opt/homebrew/bin/whisper-cli" if os.path.exists("/opt/homebrew/bin/whisper-cli") else "/usr/local/bin/whisper-cli")
 WHISPER_MODEL = os.path.expanduser("~/.whisper-models/ggml-base.en.bin")
 RESOLUTION = 768            # OCR-grade — small on-screen text (URLs, slide bullets, code) stays readable
 MAX_FRAMES = 200            # hard cap (was 30) — 1 frame per ~15-30s for typical content
@@ -27,13 +27,22 @@ SCRAPE_TIMEOUT = 25         # was 8 — let slow legit pages finish
 SCRAPE_DEPTH = 2            # follow links from scraped pages 1 more level
 SCRAPE_RETRIES = 1
 MAX_COMMENTS = 500          # was 100; cap to bound doc size on viral videos
-RAW_FRAMES_DIR = Path("/Users/parthnaria/Documents/Claude/yt-deep-knowledge/_raw_frames")
+RAW_FRAMES_DIR = Path(os.environ.get("RAW_FRAMES_DIR") or "_raw_frames")
 RAW_FRAMES_DIR.mkdir(parents=True, exist_ok=True)
 
 # Import vision pool
 sys.path.insert(0, str(Path(__file__).parent))
 from vision_pool import get_pool
 
+
+
+def _yt_cookie_args():
+    """Return cookie flags based on env. Local mac uses Chrome; runner uses cookies.txt if provided."""
+    if os.environ.get("YT_DLP_COOKIES_BROWSER"):
+        return ["--cookies-from-browser", os.environ["YT_DLP_COOKIES_BROWSER"]]
+    if os.environ.get("YT_DLP_COOKIES_FILE") and os.path.exists(os.environ["YT_DLP_COOKIES_FILE"]):
+        return ["--cookies", os.environ["YT_DLP_COOKIES_FILE"]]
+    return []
 
 def log(msg, tag=""):
     ts = time.strftime("%H:%M:%S")
@@ -52,7 +61,7 @@ def video_id_from_url(url):
 # ---------- yt-dlp ----------
 
 def yt_metadata(url, with_comments=True):
-    args = ["yt-dlp", "--cookies-from-browser", "chrome", "--skip-download",
+    args = ["yt-dlp", *_yt_cookie_args(), "--skip-download",
             "--write-auto-subs", "--sub-lang", "en", "--sub-format", "vtt",
             "-o", str(TMP_ROOT / "%(id)s.%(ext)s"),
             "--dump-json", "--no-warnings"]
@@ -96,7 +105,7 @@ def download_video(url, vid_id):
     out = TMP_ROOT / f"{vid_id}.mp4"
     if out.exists():
         return out
-    run(["yt-dlp", "--cookies-from-browser", "chrome",
+    run(["yt-dlp", *_yt_cookie_args(),
          "-f", "best[height<=480]/best", "-o", str(out),
          "--no-warnings", "--quiet", url], timeout=600)
     if out.exists():
