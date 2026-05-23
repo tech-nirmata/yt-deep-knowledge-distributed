@@ -26,9 +26,17 @@ jobs:
           GROQ_KEYS_JSON: ${{ secrets.GROQ_KEYS_JSON }}
           CHUNK_INDEX: ${{ matrix.chunk }}
         run: |
-          KEY=$(echo "$GROQ_KEYS_JSON" | python3 -c "import json,sys,os; keys=json.load(sys.stdin); idx=int(os.environ['CHUNK_INDEX']) % len(keys); print(keys[idx])")
+          python3 <<'PY' > /tmp/picked_key.txt
+          import json, os
+          raw = os.environ['GROQ_KEYS_JSON'].strip()
+          keys = json.loads(raw)
+          idx = int(os.environ['CHUNK_INDEX']) % len(keys)
+          print(keys[idx])
+          PY
+          KEY=$(cat /tmp/picked_key.txt)
           echo "::add-mask::$KEY"
           echo "GROQ_API_KEY=$KEY" >> "$GITHUB_ENV"
+          rm /tmp/picked_key.txt
       - name: Process chunk
         env:
           CHUNK_INDEX: ${{ matrix.chunk }}
