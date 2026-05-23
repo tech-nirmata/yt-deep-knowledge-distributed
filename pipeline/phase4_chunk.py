@@ -17,26 +17,38 @@ OUT_DIR = Path(f"results/chunk-{CHUNK:02d}")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 LOG = OUT_DIR / "_chunk.log"
 
-PROMPT = """CRITICAL: The viewer ALREADY HAS THE FULL TRANSCRIPT. Do NOT transcribe, paraphrase, or quote anything the speaker says. Write ONLY about visible content the transcript cannot capture.
+PROMPT = """CRITICAL: The viewer ALREADY HAS THE FULL TRANSCRIPT. Do NOT transcribe, paraphrase, or quote spoken audio. Write ONLY about visible content the transcript cannot capture. Capture EVERYTHING visible — do not skip details. EVERY on-screen text, EVERY chart, EVERY slide, EVERY meaningful B-roll moment.
 
 Required output (markdown sections):
 
 ## Setting & production
-Location, camera angle, wardrobe, props, lighting, background.
+Location, camera angle, wardrobe, props, lighting, background. Note any change in setting throughout the video.
 
-## Timestamped visual events
-ONLY non-audio content. Each entry: `MM:SS — what appears on screen`. On-screen text, slides, charts, screen recordings, B-roll, whiteboard, demos, dashboards, screenshots.
+## Timestamped visual events (EVERY visual change)
+ONLY non-audio content. Each entry: `MM:SS — what appears on screen`. Include EVERY:
+- On-screen text overlay, lower third, caption, kinetic typography (verbatim)
+- Slide change, chart, graph, diagram, flowchart, table
+- Screen recording (name the app + the action shown step by step)
+- B-roll, cutaway, stock footage, archival clip
+- Whiteboard, notepad, sketch (describe content)
+- Demo, product walkthrough, screen-share, dashboard
+- Before/after comparison, results screenshot
+- Cut/transition that changes scene
+- Animation or motion graphic
 
-## Visual frameworks
-Diagrams/models/frameworks shown — describe structure so someone could redraw.
+## All visual frameworks
+EVERY diagram, model, framework, matrix, pyramid, funnel, quadrant, flowchart shown. Describe structure + labels in enough detail to reconstruct. Capture all of them, not just the main one.
 
 ## Brand & reference visual evidence
-URLs, social handles, brand logos, product names visually present.
+EVERY URL, social handle, brand logo, product name, software UI, book cover, business card visible on screen. List exhaustively.
 
 ## Visual storytelling devices
-Pattern interrupts, zoom-ins, cuts, transitions that change meaning.
+Pattern interrupts, zoom-ins, fast cuts, slow pans, color shifts, lower-third reveals — only when they change meaning.
 
-If talking-head only with no visuals: one sentence stating so."""
+## Speaker body-language peaks
+Distinctive moments where energy or gesture significantly changes meaning. Skip routine gestures.
+
+If video is truly talking-head with zero meaningful visuals beyond speaker's face: write a single sentence saying so and stop."""
 
 def log(msg):
     line = f"[{time.strftime('%H:%M:%S')} c{CHUNK}] {msg}"
@@ -71,8 +83,9 @@ def main():
             continue
 
         t0 = time.time()
-        # try a few models in order
-        models = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"]
+        # NO COMPROMISE: pro (best vision) > flash > flash-latest > flash-lite
+        # fps=1.0 default (every frame); on token limit, segment instead of dropping fps
+        models = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"]
         result_text = None
         used_model = None
         for model in models:
@@ -82,7 +95,7 @@ def main():
                         model=model,
                         contents=gtypes.Content(parts=[
                             gtypes.Part(file_data=gtypes.FileData(file_uri=url, mime_type="video/mp4"),
-                                       video_metadata=gtypes.VideoMetadata(fps=0.5)),
+                                       video_metadata=gtypes.VideoMetadata(fps=1.0)),
                             gtypes.Part(text=PROMPT),
                         ]),
                     )
@@ -100,24 +113,39 @@ def main():
                             time.sleep(45 + retry * 30)
                             continue
                         break
-                    if "1048576" in err:
-                        # too long — retry with fps=0.2
+                    if "1048576" in err or "exceeds" in err.lower():
+                        # too long — try segmented analysis: process video in 30-min chunks
+                        # via startOffset/endOffset, then merge results
+                        log(f"  long video — segmenting {vid}")
                         try:
-                            resp = client.models.generate_content(
-                                model=model,
-                                contents=gtypes.Content(parts=[
-                                    gtypes.Part(file_data=gtypes.FileData(file_uri=url, mime_type="video/mp4"),
-                                               video_metadata=gtypes.VideoMetadata(fps=0.2)),
-                                    gtypes.Part(text=PROMPT),
-                                ]),
-                            )
-                            t = (resp.text or "").strip()
-                            if len(t) >= 100:
-                                result_text = t
-                                used_model = model + " (fps=0.2)"
+                            segments = []
+                            for seg_start in range(0, 7200, 1800):  # up to 2h, 30-min segments
+                                seg_end = seg_start + 1800
+                                seg_resp = client.models.generate_content(
+                                    model=model,
+                                    contents=gtypes.Content(parts=[
+                                        gtypes.Part(file_data=gtypes.FileData(file_uri=url, mime_type="video/mp4"),
+                                                   video_metadata=gtypes.VideoMetadata(
+                                                       fps=1.0,
+                                                       start_offset=f"{seg_start}s",
+                                                       end_offset=f"{seg_end}s",
+                                                   )),
+                                        gtypes.Part(text=PROMPT),
+                                    ]),
+                                )
+                                seg_t = (seg_resp.text or "").strip()
+                                if seg_t and len(seg_t) >= 80:
+                                    segments.append(f"### Segment {seg_start}s-{seg_end}s\n\n{seg_t}")
+                                elif not segments:
+                                    break  # first segment empty = video shorter than 30min, fallback won't help
+                                else:
+                                    break  # reached end of video
+                            if segments:
+                                result_text = "\n\n".join(segments)
+                                used_model = model + f" (segmented {len(segments)} parts)"
                                 break
-                        except Exception:
-                            pass
+                        except Exception as e2:
+                            log(f"  segment err: {str(e2)[:100]}")
                     break
                 except gerrors.ServerError as e:
                     if retry < 2:
