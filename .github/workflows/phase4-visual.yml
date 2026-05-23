@@ -1,0 +1,53 @@
+name: Phase 4 — Gemini visual analysis (20 parallel runners)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        chunk: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install google-genai
+
+      - name: Pick Gemini key based on chunk index
+        env:
+          GEMINI_KEYS_JSON: ${{ secrets.GEMINI_KEYS_JSON }}
+          CHUNK_INDEX: ${{ matrix.chunk }}
+        run: |
+          KEY=$(echo "$GEMINI_KEYS_JSON" | python3 -c "import json,sys,os; keys=json.load(sys.stdin); idx=int(os.environ['CHUNK_INDEX']) % len(keys); print(keys[idx])")
+          echo "::add-mask::$KEY"
+          echo "GEMINI_API_KEY=$KEY" >> "$GITHUB_ENV"
+
+      - name: Process chunk
+        env:
+          CHUNK_INDEX: ${{ matrix.chunk }}
+          TOTAL_CHUNKS: 20
+          GEMINI_API_KEY: ${{ env.GEMINI_API_KEY }}
+        run: |
+          python pipeline/phase4_chunk.py
+
+      - name: Upload results as artifact
+        if: always()
+        env:
+          CHUNK_INDEX: ${{ matrix.chunk }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase4-chunk-${{ matrix.chunk }}
+          path: results/
+          if-no-files-found: warn
+          retention-days: 7
