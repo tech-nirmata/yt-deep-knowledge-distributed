@@ -1,0 +1,15 @@
+---
+notebook_id: 504e4d6b-11a1-44d3-886b-e814b3c591be
+notebook_title: "Chris Voss & The Black Swan Group"
+source_id: db670d13-6449-4b25-a88c-c711d4f65443
+source_title: "How to take Negativity OUT of ANY Conversation?"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 12:16:54 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# How to take Negativity OUT of ANY Conversation?
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+i understand that meetings can be time sensitive and when you make a robust list of audits what you should plan on doing is getting through your entire list um on zoom it's a little bit easier because you can have that piece of paper in front of you nobody knows nobody knows it's there so you just read from your paper you read it just like troy did it in his example read an audit pause one one thousand two one thousand read an audit pause one thousand two one thousand um the key is when you make your list you put the most important audit at the top the the thing that you think they're thinking that is the biggest negative that's number one and when you actually give your audits you start with number two so you read number two first you read down through as far as you can get okay so a few different things may happen one the person's going to say no no no like in troy's example no no no you know i'm not thinking that at all no no no then you say okay and then you say your final audit which is number one because the last impression is the lasting impression you say that number one audit the last one they hear is the biggest negative that you're going to mitigate that way you know you get that one in or somebody's gonna um say no you know especially if they're assertive no you know i'm not thinking that you know can we just kind of move it on cause i don't have a lot of time and then you say yeah sure and give them that last audit and then move on with the meeting okay the thing is however it moves forward if they stop you it's them moving the meeting forward which don't lose sight of what a big psychological you know thing that is because they're the ones pushing the meeting forward it's not you it's going forward at their request okay so they're pushing the meeting forward if you get all the way through your list i mean if you have 17 audits and you get all the way through your list and they're just sitting there staring at you you might have an issue um you definitely want to address that you definitely want to throw out a label it seems like um there may be some things that i'm failing to understand and then whatever you've missed out um they're going to point it out to you okay but keep in mind all of these negative things that you list at some point in time the things that you don't get to mitigate at the very beginning they're going to come up in the negotiations so you're going to have to be ready to deal with those issues because all those negative things that they're thinking are going to have to be addressed at some point okay because they don't go away if you don't address them how we doing troye you 

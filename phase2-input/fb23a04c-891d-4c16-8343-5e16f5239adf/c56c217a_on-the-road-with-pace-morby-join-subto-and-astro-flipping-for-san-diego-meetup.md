@@ -1,0 +1,15 @@
+---
+notebook_id: fb23a04c-891d-4c16-8343-5e16f5239adf
+notebook_title: "4 Creative Strategies Layered Into One Massive Deal"
+source_id: c56c217a-5914-450b-bdd7-674a56e26909
+source_title: "On the Road with Pace Morby | Join Subto and Astro Flipping for San Diego Meetup"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 14:43:14 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# On the Road with Pace Morby | Join Subto and Astro Flipping for San Diego Meetup
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+hey Family Guys first and foremost welcome to the biggest Bigger Pockets event that's happened outside of Vegas let's go you heard us talk enough today at the seminar we're not going to talk we just want to say a couple of things hey you know what we got Big Boy from Outcast is like five blocks away yeah legit he's texting me right now let's send him a video we got some Outkast in here but let's play uh So Fresh So Clean real quick oh my God five second video where you guys just scream and I'm gonna send it to Big Boy and tell him to come over here okay so fresh or clean on the count of three I want you guys to yell Outcast okay one two three hey hey Family Guys first and foremost welcome to the biggest Bigger Pockets event that's happened outside of Vegas look at what this community has become whether you're astral flipping or sub to what you understand is that your brothers and sisters and we're all in the same trade we're all doing the same thing together and all I want to tell you guys is your man yeah foreign years ago pace and I decided to go out on the road and start talking to people about what it meant to collaborate what it meant to do what we do with everybody who instinctively is supposed to be against us folks have said aren't on your side but guess what every one of the people in this room right now might be your competitor but they're your collaborator so on the count of three I wanted to say collaboration over competition one two three addiction all right man I love Astro life changing life-changing let me tell you what to close my first deal and I can't stop I'm on closing deal machine man I think it's a really dope company you know it's helping out a lot in the real estate industry flow connecting with new agents the new socials and you know it's really an amazing opportunity to come out here and network as well oh yeah the most amazing mentorship in the planet first of all hey smorby everything he teaches he teaches from the heart he's about go-giving and helping others and he instills those values in all of us leaders and all of us students in those nuclear we're all there to help each other and grow thank you bro amazing I can't believe this many people came out in SoCal to come hang out with us too hey everybody that came out it means the world to us hearing all the stories how our content is changing your life how our community is changing your life it means the world to us it's what makes us show up the emotional income that we get is unbelievable thank you I've had a hard time I love you 

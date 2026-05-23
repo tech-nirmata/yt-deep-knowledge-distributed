@@ -1,0 +1,15 @@
+---
+notebook_id: 53d167bc-fd83-41fe-847e-36cf11efd1c0
+notebook_title: "Sales Feed"
+source_id: 3fda0236-3ac8-4220-a1c6-ae21e6f463ba
+source_title: "The best answer to 'Sell me this pen' for B2B sales"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 13:58:25 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# The best answer to "Sell me this pen" for B2B sales
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+sell me this pen all right then uh before we get started would you be happy for me to spend a couple of minutes asking you some questions to see if this pen would be a good fit for you yeah go ahead are you currently looking for a new pen i am and what's the reason you're looking for a new pen well my current pen isn't the best isn't the best it's uh it's a little uncomfy i'm sorry to hear that your your current pen there isn't very comfortable could you tell me a little bit more about that yeah when i write for extended periods of time it um gives me sores on my hand so you just hit what's the reason you think that keeps happening it's too wide with my hand see so your pen is too large it becomes uncomfortable which causes sores on your hands have i got that right you nailed it and what happens when you get these sores on your hands when i've got the saw on my hand i can't write any more notes because it hurts too much may you give me an example of maybe some of the more important notes that you take yeah i take a lot of notes but i'd say the most important ones are probably when i'm going to meet with a client and i'm taking notes of what they're saying right and what happens when you don't take notes during those meetings i do tend to forget uh follow-up items important details it's actually lost a couple of clients in the past what's an average client worth to you client could be anywhere from five to 20k and how often does the uh the note situation happen maybe like once a month how do you feel about the fact that something as simple as a pen is potentially causing you to miss out on upwards of a hundred and fifty thousand dollars a year it's frustrating obviously of course i would be frustrated too what would you do with 150 000 a year if you had it ah with that kind of money i'd probably hire a new sales rep upgrade some of our equipment pay back some loans i love the ambition look we sell this pen and it's got hundreds of bells and whistles but rather than waste time showing you all of those i think the most important thing to you right now seems to be comfort um so it's a lot thinner than the current pen you're holding so that you can stay comfortable while writing for long periods of time oh wow yeah could i take a quick look yeah it's much better would you say that would solve the comfort issue that you mentioned earlier yeah i would say would solve the issue in that case would you be totally opposed for me to set you up with one of those pens today yeah okay let's do it great doing business with you could i ask you a quick favor do you happen to know anyone who's a bit like you who could benefit from talking to me about pens 

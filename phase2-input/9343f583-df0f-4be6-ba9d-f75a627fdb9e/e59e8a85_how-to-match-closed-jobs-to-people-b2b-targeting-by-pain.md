@@ -1,0 +1,15 @@
+---
+notebook_id: 9343f583-df0f-4be6-ba9d-f75a627fdb9e
+notebook_title: "Jordan Crawford (Blueprint)"
+source_id: e59e8a85-8622-41f2-95fe-2a85cbf192c5
+source_title: "How to Match Closed Jobs to People! B2B Targeting by Pain!"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 11:32:43 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# How to Match Closed Jobs to People! B2B Targeting by Pain!
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+all right uh this is an insane insane play so i have been working with a company here to uh to run this crazy play against our jobs data so what i did is i looked at every company that mentioned product led growth in their job description so that's not all so we have this huge list now let's see uh 1829 different job descriptions it gets better so i clean the job uh descriptions uh we worked the company to clean the job descriptions i don't have that technology yet it's coming and i have their full job description well why does this matter well what if you're a product like growth company and you want to target people that are responsible for the problems that your product solves so that might be a data analyst maybe help product like growth companies with data analyst stuff program manager but it's only helpful if you can find the person that's responsible so that's what we did so we looked at the job title we looked at the company we looked at the close date we matched that against the company the job title and the start date and so now we have this array of information what year did they start what's their linkedin url what's their name so we've got this list of uh of the 1800 jobs we have people and now i know what they're responsible for so you can write an outreach message that says hey jordan uh congrats on joining i bookmarked what looks to be your job description and it seems like one of your key responsibilities is to lower the cost of customer acquisition for your product led growth company did you know that we here at correlated can help you do that you can write that message you can send it programmatically and now you are contacting people based on the problems that they have to solve and not trying to convince them to solve problems that they don't have that you don't know they have so please do contact me if this is interesting to you i'm jordan blueprintgtm.com and thanks for watching i love crazy growth ideas and i'm always down to share them with you i will let you know how this test goes i don't yet have a customer in mind for this particular data set but i am doing this exact same thing for a sales led company so looking at people based on the sales technologies that they use as well as uh who has to build lists and so we're gonna take that information we're gonna do an outbound campaign for a company that that solves basically list building thanks so much for watching and you should congratulate yourself for learning a little bit more about some really interesting automated sales tactics thank you for watching 

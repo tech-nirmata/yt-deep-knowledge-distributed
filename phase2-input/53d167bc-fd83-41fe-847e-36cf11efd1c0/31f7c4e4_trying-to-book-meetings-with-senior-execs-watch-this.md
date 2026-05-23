@@ -1,0 +1,21 @@
+---
+notebook_id: 53d167bc-fd83-41fe-847e-36cf11efd1c0
+notebook_title: "Sales Feed"
+source_id: 31f7c4e4-b72d-42ee-9c3d-81c3a3b827b6
+source_title: "Trying To Book Meetings with Senior Execs? Watch This."
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 13:58:40 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# Trying To Book Meetings with Senior Execs? Watch This.
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+are you trying to land a meeting with a senior exec don't make the mistake of all right so if you're reaching out to senior Executives do not make this mistake one mistake that people should avoid when reaching out to execs so you're reaching out to senior Executives what mistake should you avoid reaching out to senior Executives please don't make the mistake of using this very overused cold email framework hi my name is Jen I noticed you're a cro we work with other leading C to help them do whatever better and faster are you free for 15 minutes to discuss cxos are paid the 
+big bucks to root cause really complex business problems as a result they often don't want to talk to product pushers they rather talk to problem Consultants who give them new unique information that helps them better understand if the problem is worth solving so instead give them an idea of how to size a problem you're hypothesizing that they have that leads to your solution instead of leading with it talking about problems that they don't care about so 
+oftentimes you'll be talking to execs with problems that only relate to an individual contributor use case or director level use case talk to Executives about executive level problems talking about your solution we have to speak with senior Executives very different from our below the line counterparts senior Executives often won't especially at larger companies they're not going to be engaged in what the solution is or what it does they care a lot about does this align with my priorities right now and will this help relieve a bottleneck that we have that I 
+or may not be aware of so first speak to what you understand to be their priorities and problems and you're going to do that by just emulating the past 5 to 10 closed One deals with that particular Persona what was top of mind for them what business priority did you align with and that's what you're going to ask for whether in your email or over the phone people like you typically are focused on these things they sometimes run into this problem here's an Insight on how we helped a similar company three four sentence email 
+three four sentence introduction and a cold call do not talk about your solution keep it really high level in align with priorities and problems and that mistake is sending the same emails that you would and we already talked about this to the sea level and VP that you would to below the line prospects um often times c-level executives are way further removed from what the problem is at the manager and director or IC level and so when you're speaking to them you have to a come with more personalized information and research about what's going on in the company 
+specifically you can't just say hey I hear this from sea levels or you know Executives all the time you have to have real research that you did on the company which is why I recommend starting below the line first and then the second thing is you have to focus on problems that they care about which are typically much more high level and not in the weeds details around the product or features or things of that nature being long-winded these people they're busy you need to be briefed and you need to not follow the pattern of all the other sales Outreach out there the vast majority of which is generic self- serving poorly targeted long 
+so by just by flipping it on its head and sending really well targeted last generic problem Focus messages that are short and concise you're going to get the attention of Executives a lot more because these people are busy their attention is in short supply join me at the next outbound Sprint launching on January 16th I'll be talking about cold email how to land more meetings by overcoming your buyer's mental spam filter see you there 

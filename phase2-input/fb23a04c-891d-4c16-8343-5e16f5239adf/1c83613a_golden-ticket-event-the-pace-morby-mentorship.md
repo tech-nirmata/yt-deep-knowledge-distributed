@@ -1,0 +1,15 @@
+---
+notebook_id: fb23a04c-891d-4c16-8343-5e16f5239adf
+notebook_title: "4 Creative Strategies Layered Into One Massive Deal"
+source_id: 1c83613a-89ae-4dc6-8880-2ec335b4b120
+source_title: "Golden Ticket Event | The Pace Morby Mentorship"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 14:39:42 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# Golden Ticket Event | The Pace Morby Mentorship
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+okay let let uh my team at the back know how much you guys adore them and love them please dude we just got the fucking contract and we already have a run lined up that's insane dude foreign getting did you guys walk away with at least 10 15 new connections here's what I want to do here's the vision for the golden ticket event I wanted to create this competition style activity that forces the peers of the world to have these amazing moments did you have an amazing moment today yeah yeah okay I want to create more of that it was you almost shit your pants I have to have these moments not just here but you have to have them in your local area Okay so who's going to go home and start a meet-up even if it's five people ten people if you're local people amazing okay so here's what we're going to do going forward we're going to do this competition live with the meetup groups of subject so what will happen is we'll now start competing Nationwide for the next activity next month's activity I want to know how cool this activity is I'll tell you what it is it's a little bit different than this one I get a lot of people that ask me hey will you show me how to buy a sub 2 car and so next month we're going to look for a Sprinter van for Carly grunman as a community and we're going to have a competition to do so you guys down with that that'll do it and I'll show you guys we'll show you guys the script we're going to do the next time I do this event we're going to do it live and we're going to have people running the zoom room and your guys's local account okay great so when you guys go home what we're going to do is we're only going to let the accountability groups or the the meetup groups all over the country come into the zoo next month we're going to do the competition competition together so if you guys are meeting together at these meetups you're not just showing up and hanging out you have these moments of being able to connect with each other and also run competitions and do some fun stuff together you guys down with that yeah yeah and we'll do it as a community where you just invested a bunch of money into like technology that allows us to do this so we all feel like we're cohesive and together here's the unfortunate thing you are everybody concerned you are disqualified for coming back to the golden ticket for a year I am okay we're the first you're the first okay don't be sad be happy you're the first so before I leave I got to leave I'm gone you and I will go outside I'll do a live with you before I leave I want to get a group photo of everybody from the first golden ticket event foreign foreign 

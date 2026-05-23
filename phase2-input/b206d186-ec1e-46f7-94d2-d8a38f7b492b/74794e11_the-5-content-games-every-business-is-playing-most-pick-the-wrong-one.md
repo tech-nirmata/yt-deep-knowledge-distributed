@@ -1,0 +1,15 @@
+---
+notebook_id: b206d186-ec1e-46f7-94d2-d8a38f7b492b
+notebook_title: "Open Residency"
+source_id: 74794e11-8e48-4dcb-ae55-e397f44ae8fc
+source_title: "The 5 Content Games Every Business Is Playing (Most Pick the Wrong One)"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 16:58:26 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# The 5 Content Games Every Business Is Playing (Most Pick the Wrong One)
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+most people will go to a guru and they'll be like "What should my content strategy be?" And most of these gurus don't have the sophistication to be like "Well it depends what your business is it depends what the offer is." There's these different buckets these different games right you need to pick which of these five games we talk about that fits you best and then adapt the strategies and maybe as we go I can like break them down the first two games we'll call the media game so one of them is entertainment so entertainment media the second one is education so education media the media game's full purpose is to maximize views at all costs because you're monetizing via like CPM so like YouTube AdSense or like the Tik Tok creator fund or brand deals and brand deals pay based on views entertainment media would be like Mr beast streamers anyone who's like just trying to entertain at like the highest possible volume and the difference between education entertainment is just education videos you can watch them and then tactically apply something to fix a problem anything else is entertainment those games need a shit ton of views to play so like there's a certain strategy around ideas around niching around how you actually execute the videos to get a ton of views the second two are about consumer products if you have a consumer product at the bottom of the funnel the first of the consumer products is if you have a commoditized consumer product you don't need to educate the viewer on how the product works so like clothing or you sell couches or you sell hats so you don't have to educate them on how it works however you need to get them aware so there's a strategy there then bucket four is like consumer products that do require education so this could be like AG1 ag1 is just a green powder in a box if you see that you don't really know what that is like that could be matcha that could be greens powder which is what it is like you don't know so the viewer needs some amount of education to close the gap now they don't need a shit ton of education you can give it to them pretty quick but that's a different content strategy so that's bucket four bucket five is like everything B2B you're selling business services coaching info products B2B SAS everything where lots of education is required so those are like the five content games you pick based on the business model right cuz everyone's making content cuz they're trying to make money like let's just be honest but that is a critical first step you have to pick the game and adjust accordingly 

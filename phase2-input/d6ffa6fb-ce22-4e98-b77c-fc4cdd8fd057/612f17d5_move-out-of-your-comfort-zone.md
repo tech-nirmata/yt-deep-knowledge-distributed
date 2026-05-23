@@ -1,0 +1,15 @@
+---
+notebook_id: d6ffa6fb-ce22-4e98-b77c-fc4cdd8fd057
+notebook_title: "Upward Communication"
+source_id: 612f17d5-2af6-4ab8-adf6-cfd57659d408
+source_title: "Move Out Of Your Comfort Zone"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 14:06:59 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# Move Out Of Your Comfort Zone
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+perhaps the biggest single obstacle that salespeople have especially when they start off and then even later is they get into a comfort zone they get into an area of complacency in fact we say that success is sometimes the greatest enemy of further success because people say well I'm doing pretty well I don't need to be doing better than this and they just start to Coast but unfortunately there's only one direction in which you can Coast so the key to becoming more successful to making more sales and making more money is to force yourself to move out of your comfort zone what this means is that you have to raise your self-concept your idea of yourself as a salesperson for example uh whatever you earned last year set a new goal to earn 50% more and write it down as a number be very specific about it and start to think about yourself as earning that amount of money think if I was earning that amount of money what would I be doing differently today what would I be doing from morning to evening what would I be doing differently all day long if I was earning that kind of money in a book called leaders by Warren Bennis which is very popular book at one time they found that leaders like yourself have five qualities in common and the the one that he talked about was that leaders were aware of the tendency to fall into a comfort zone and to sort of start doing things the same way over and over again and they deliberately forc themselves out of their comfort zone by setting bigger goals for themselves and when you set bigger goals you create a self-image of yourself as doing far better than you're doing today I'll give you an example a sales manager I worked for whenever he hired a new salesperson he'd say do you have a car I said yes well come with me and he would take them down to the nearby C Cadillac dealership he'd forced them to trade in their car on a Cadillac and the first payment was due uh the next month and drive home in a brand new Cadillac well many of the salespeople were really really tense about this and their wives they got really upset but you know what happened every one of them became a great success they started driving around in a brand new Cadillac and seeing themselves as if they were top salespeople they spoke with greater confidence they had a different self-image they had a different self concept so you can do the same sort of thing yourself see yourself as the best in your field set big goals for yourself that move you out of your comfort zone and never be satisfied at any level of performance remember as Shakespeare said the past is merely Prelude whatever you've accomplished in the past is only a fraction of what you can truly accomplish in the future if you move out of your comfort zone the 

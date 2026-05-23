@@ -1,0 +1,15 @@
+---
+notebook_id: 9343f583-df0f-4be6-ba9d-f75a627fdb9e
+notebook_title: "Jordan Crawford (Blueprint)"
+source_id: efecb569-468d-402e-98d9-aa08646f7fc9
+source_title: "Blueprint Jobs Alpha Access"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 11:23:13 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# Blueprint Jobs Alpha Access
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+friends today it's my birthday and I want to give away what I built today I want people to start using it and so it's not yet ready for prime time it's an alpha but I'm going to drop the form below and you're gonna be able to sign up and it's free and you'll be able to search through 4.1 million jobs from 140 000 companies and sort all that data by the pain that your product solves and you'll be able to do it for free in my tool there's something I have been worried about which is how people use it what if they don't know how to take a company and turn it into a lead but I want to put it in your hands and I want you to start giving me feedback tell me what you like what you don't like so oh I should also say we've added AI search which just means that you can type in a natural language query that looks like win titles so when VPS of sales are struggling with problem struggling to get demand I help them X I help them build demand engines right you can write that sentence you push AI search and it will tell you the best jobs for that search the top top jobs for that search that talk the most about the problems that you solve and it's instant I mean it's near instant we may have to slow it down actually because it's like a little fast um yeah so thank you so much for coming on this journey for me you're going to see a form below so you can request access there are some requirements you're going to have to put up with possible bugs here uh some confusing user experience uh you will be required to join a slack group to talk with other people that are using it and provide feedback tell me how you're using it and uh yeah and then eventually provide feedback on pricing when we launch so thank you so much for consuming my content for so long and for making it to the uh to the end of this video I'm so grateful for your time for investing in learning about me about what I do about the problem I'm trying to solve hopefully for you and I really hope that you can gain value out of this so if you could help me celebrate my 40th by requesting access and um hopefully providing me feedback thanks so much for being here with me I am eternally grateful and I'm driving I'm on the great selfie tour uh the revenue selfie tour of 2023 so I am in Boulder Colorado right now I'm hanging out with some folks in Denver tonight um some Revenue folks Nate and Harris and Sam and if you are anywhere west of Denver let me know uh I have an offer right now for a dinner in Salt Lake and a dinner in Phoenix so um so come with your A game thanks so much everyone have an absolutely wonderful Friday and a great weekend I am so glad you're here with me bye 

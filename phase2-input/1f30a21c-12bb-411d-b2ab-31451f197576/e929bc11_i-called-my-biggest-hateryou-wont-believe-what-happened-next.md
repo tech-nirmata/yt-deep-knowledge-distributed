@@ -1,0 +1,15 @@
+---
+notebook_id: 1f30a21c-12bb-411d-b2ab-31451f197576
+notebook_title: "Andy Elliott"
+source_id: e929bc11-31a6-4ff6-88da-d9ff6c1b1fbb
+source_title: "I Called My Biggest HATER..You Won’t Believe What Happened Next "
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 07:53:18 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# I Called My Biggest HATER..You Won’t Believe What Happened Next 
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+how long you been selling cars for i've been in sales for 44 years wow these aren't role plays these are real dealers with real objections and I'm putting their calls to the test watch me break down who actually knows how to sell and who's just talking i'm hungry to to sell a car i was calling to get some information on a vehicle I saw on the internet or your owner of your store heard you take this call so is that a typo on the price well I'll tell you what buddy i'm going dark mode thank you for calling all right guys jacob has been a trash talker talking about "Hey I know I'm the best i can overcome every objection i can do this let's run and play the Jacob test wally help me help me." Yeah Wall-E I was trying to get a hold of Jacob sure Jacob's going to transfer you over to Jacob right now okay okay buddy thank you watch this i'm going to put mad pressure on Yeah this is Jacob yes speaking jacob do you got two minutes hey what's going on oh nothing yeah no my name is Andy Elliot you've been commenting on my stuff on you on the Instagram okay what's going on buddy yeah do you remember that yeah I do i do oh good good okay well listen i got you live right now with millions of people listening to you and I'm going to hit you with four objections and we're going to see how you you handle it okay number one absolutely okay number one 2014 Nissan Ultima 38,000 mi it's priced at 21 grand the price is too high go price is too high yep go hello yep go well it just depends kind of you know if you're calling in if the price is too high I mean there's there's a lot of there's a lot of aspects to that you know i mean if they're calling in far away um Jacob you know I just think the price is too high let's go buddy come on man don't choke on this one it's just the first one down you got it price is too high let's start over go andy you kind of cutting out buddy i'm not cutting out buddy i promise you so so Jacob the price is too high okay overcome the objection go andy you there i'm right here buddy don't pretend that the phone isn't working i promise you everybody's listening to you all around the world are you ready are you scared guys this is a salesperson freezing just freezing this guy's freezing i told them millions of people were watching you're getting a shot he literally choked live this is the keyboard warriors that we talk about on the internet you guys see me overcoming objections every day shutting down deals i show you guys live me doing it and this guy gets a shot he straight chokes jacob you failed the 

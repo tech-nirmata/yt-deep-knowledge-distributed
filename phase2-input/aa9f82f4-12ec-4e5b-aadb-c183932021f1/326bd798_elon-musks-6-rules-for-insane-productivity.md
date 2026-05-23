@@ -1,0 +1,15 @@
+---
+notebook_id: aa9f82f4-12ec-4e5b-aadb-c183932021f1
+notebook_title: "Adam Erhart Part 1/5"
+source_id: 326bd798-22dc-40e4-88e6-c9e5cee21025
+source_title: "Elon Musk's 6 Rules for INSANE Productivity"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 17:26:35 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# Elon Musk's 6 Rules for INSANE Productivity
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+as you may have heard Elon Musk recently sent an email to his staff that gave them his six rules for productivity unsurprisingly the email was leaked and the content found its way to Twitter because that's one of Twitter's many talents that and posting memes fortunately for us though Elon happens to be part of the Twitter Audi an active twitterer oh yeah and he owns Twitter so he was kind enough to chime in and verify that this was indeed the email he sent which means that the contents of this email are worth taking a closer look at much closer because love them or hate him there's no arguing that is the founder of multiple companies and the richest man in the world the man knows a thing or two about getting stuff done so with that said let's dive into elon's first rule for productivity which is to avoid large meetings in elon's words large meetings waste valuable time and energy they discourage debate people are more guarded than open and there's not enough time for everyone to contribute the key Point here don't schedule large meetings unless you're certain they provide value to everyone next rule leave a meeting if you're not contributing if a meeting doesn't require your input value or decisions then your presence is useless it's not rude to leave a meeting but it's rude to waste people's time rule number three forget the chain of command communicate with colleagues directly not through supervisors or men fast communicators make fast decisions and fast decisions equal a competitive advantage next rule be clear not clever avoid nonsense words and Technical jargon it slows down communication choose words that are concise to the point and easy to understand don't sound smart be efficient okay moving on to rule number five ditch frequent meetings there's no better way to waste everyone's time use meetings to collaborate attack issues head on and solve urgent problems but once you resolve the issue frequent meetings are no longer necessary you can resolve most issues without a meeting instead of meeting send a text send an email communicate on a Discord or slack Channel don't interrupt your team's workflow if it's unnecessary rule number six use common sense if a company rule doesn't make sense contribute to progress or apply to your specific situation avoid following the rule with your eyes closed don't follow rules follow principles and to see how Elon applied all of these rules to turn Tesla into one of the fastest growing brands in the world world without spending a single Dollar on Advertising check out this video right here which is going to show you exactly how we did it so make sure to check that out now and I'll see you there in just a second 

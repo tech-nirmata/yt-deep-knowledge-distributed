@@ -1,0 +1,15 @@
+---
+notebook_id: d6ffa6fb-ce22-4e98-b77c-fc4cdd8fd057
+notebook_title: "Upward Communication"
+source_id: fbe8406b-4ac1-47b1-8453-5abd4374e100
+source_title: "Listening Power"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 14:06:39 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# Listening Power
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+I want to talk to you now about listening power uh what we know is that listening is a form of what is called white magic listening entrances other people it enchants other people I wrote a book recently called uh the power of charm and in the power of charm I went into the subject in great depth and it basically says this if you want to be a Charming person then when you talk to people ask them really interested questions and then listen and hang on every word that they say nod smile find the person absolutely fascinating and here's the most incredible thing whether it's socially or in business is that when you listen really really well to another person as if that person was genuinely fascinating they start to become really interesting you start to become actually involved and and hanging on every word and the more you listen to other people and listen intently the more they like you what we have found is that the brain of a person who is being listened to releases endorphins and endorphins are called Nature's happy drug so when you listen really intently to another person their brain releases endorphins and they feel happy about themselves eles and they feel happy about you because you are making them feel good now in sales of course this is wonderful because when you ask really good questions and listen closely to the answers you cause the customer to feel happy being in your presence and he or she becomes much more interested in buying your product or service now how do you get a chance to listen well you ask questions now here's a great rule the person who asks questions has control the person who asks questions controls the conversation and the more questions you ask and then follow-up questions and follow-up questions the more the other person will answer and open up and eventually tell you everything that you need to know to help him or her to make a sale or to determine that he or she is not a prospect so ask open-ended questions questions that begin with what why where when which and how these questions cannot be answered with a yes only with an answer what are you doing now in this feel how is that working for you how do you feel about the way things are going what are your plans for the future who is it that makes this kind of a decision in your company every time you ask a question that starts with a pronoun who how when where which and why you cause the person to answer with an open-ended question which enables you to ask another and another the more you ask questions and listen the more Charming you become the happier the customer becomes and the more rapid L you move toward making a sale 

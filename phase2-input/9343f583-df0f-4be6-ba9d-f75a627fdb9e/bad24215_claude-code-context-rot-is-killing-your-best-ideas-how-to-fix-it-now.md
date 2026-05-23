@@ -1,0 +1,15 @@
+---
+notebook_id: 9343f583-df0f-4be6-ba9d-f75a627fdb9e
+notebook_title: "Jordan Crawford (Blueprint)"
+source_id: bad24215-6b23-442a-ad71-20b9e08d897a
+source_title: "Claude Code Context Rot is Killing Your Best Ideas - How to Fix It Now"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 11:24:22 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# Claude Code Context Rot is Killing Your Best Ideas - How to Fix It Now
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+what it is mofos All right what are we talking about today well we're talking about context rot I had a fantastic call with a um the builder of claudecodemasterclass.com just a nice guy to Japan And I was like "Yo man what what don't I know that I don't know you're a developer I'm just a guy that's vibe coding his life all day." And he was like "Well you should have this little status bar here to know where your context window is at." So I just would begin with Claude and it's like already 25% of my context window is gone I'm like what is going on well of course I asked Claude to help me So there's two things you should do There's this um Oops Claude Uh there's a thing called status uh status bar status status line Um uh so you can go ahead and like set up this status line And I didn't do it like this I just said "Hey I want to um like I want to configure it Here's what I sort of want to do." Um and so you can see I just started here in this repo Now I have 83% Before I I was basically down 25% And this thing is trying to remove um um basically trying to remove context my context window So what you want to do is just say "Hey Cloud Code um I want to have a status line that shows my uh remaining context in the window Create this for me." And you mine counts down Some people want to count up And what he was saying is like if you get to 50% of context left you basically only want to have do things that are already in the plan You don't want to invent new things You want to basically say "Give me a prompt for a new context window." And then that's when you're going to do clear and it will reset the context window But the other thing you should do is like when you install this you'll understand how much of your context window is just growing Like it loads all the skills at the at the start of this So you want to keep your context window as tight as possible And by the way this can change depending on what repo or folder that you're in So here's your sort of hot tip of the day Ask Claude to give you a status window Have it um help come up with a plan The other interesting thing that I learned is that there's all these sub agents You can determine what tools you want the sub agent to use Now in this case I said deploy three opus sub aents the most expensive model Now it's going to cost me I got to pay a little more for that Um but I'm within my window here because this is a task that I want to make sure it gets right Um yeah So uh green right now Great Hundreds of D entries optimized design for the plan Amazing So that's your little hot tip of the day Have a beautiful day 3 minutes or less That was hot pocket material Bye 

@@ -1,0 +1,15 @@
+---
+notebook_id: 9343f583-df0f-4be6-ba9d-f75a627fdb9e
+notebook_title: "Jordan Crawford (Blueprint)"
+source_id: 11048d63-f05e-4d09-8b3a-3890156897a7
+source_title: "(New Course) Your Customer's Don't Reply Because You Have Nothing Good to Say..."
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 11:19:03 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# (New Course) Your Customer's Don't Reply Because You Have Nothing Good to Say...
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+you're a founder and you start closing deals like hotcakes and it's amazing and so you think I need to hire my first sales development rep and you do and that's when it all goes wrong but it's sort of your fault because you're following a Playbook from 2001 A playbook that says hire an SDR don't train them get in front of as many buyers as you can with quick question emails or hey I see that you went to the University of Berkeley go Wildcats or hey Jordan for just twenty dollars can I get 20 minutes your time please I'm begging you for your time you're not talking to your customers about the problems they face about the Insight that you have what you were doing when you were doing found your lead sales there's a better way to do this where you can programmatically scale the insights that you have to your market and that's what this course will teach you we're going to give you Hands-On understanding of where to buy the best data how to drive your own data how to find context how to warm up inbox boxes and how to send programmatic email about the pains your customers are struggling with now well what does this look like imagine that you're a company that sells a CSV import tool that makes it really easy to get data into a customer systems we can programmatically find all of the companies that have lots of help articles that talk about the 26 steps to import their CSV and programmatically reach out and say hey Jordan I came across your five help articles that are eight pages long about importing csvs boy that must be really hard for your support team and your customers to handle what if we could give you a better way or you're a company that helps with paid ads and you send a message that says hey Jordan I noticed that your competitors are beating you in these three ways in their paid ad strategy would you like us to help or what about if you're a recruiting company that helps recruit JavaScript engineers and you could tell who are the companies that have JavaScript Engineers that have been on the market for more than 90 days and you could send a message with the perfect fit engineer with all of the skill sets that are listed in those job descriptions this is what you will not only learn in this course but we will give you the systems to deploy this messaging at scale and to test to test and to iterate so that you know which messages work to which people in which channels at what time and you don't have to break the bank to do it we are so excited to have you in this course and Eric and I hope to deliver you a bunch of new value about a brand new way to do go to market in 2020 to 2023 and Beyond 

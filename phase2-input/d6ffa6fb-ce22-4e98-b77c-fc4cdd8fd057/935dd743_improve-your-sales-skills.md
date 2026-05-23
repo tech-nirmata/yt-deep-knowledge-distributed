@@ -1,0 +1,15 @@
+---
+notebook_id: d6ffa6fb-ce22-4e98-b77c-fc4cdd8fd057
+notebook_title: "Upward Communication"
+source_id: 935dd743-ab99-4e1b-bb47-efe777507826
+source_title: "Improve Your Sales Skills"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 14:06:29 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# Improve Your Sales Skills
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+hello this is Brian Tracy and welcome to sales boosters this is one of the best times in all of human history to be alive especially in the profession of selling there have never been more opportunities for you to achieve more of your goals and enjoy a higher standard of living than exists today in our Marketplace and if anything your situation is going to get better and better in the months in years ahead as long as you do certain things which we teach you in sales boosters now as our society becomes more and more high-tech it require more and more High touch in the field of selling to balance it out and the better you get at selling the more opportunities you will have to achieve your financial goals by the way according to the best research fully 5% of self-made millionaires in America are salespeople who sold for another company all their lives the reason they are successful is because they became very very good at selling they earned a high income and then they saved and invested a sub substantial part of their income as they went along and what thousands of others have done you can do as well now let me tell you my own story I started off poor my parents never had any money my father worked as a carpenter and my mother worked as a nurse not always full-time I didn't graduate from high school in fact I was so badly behaved in high school that I was expelled or suspended three or four times I actually lost count when I started out the only work I could get was at laboring jobs I washed dishes in the back of a small hotel I worked in a sawmill stacking boards I worked on a farm digging Wells I worked in construction as a laborer carrying materials from place to place I worked on farms and ranches I worked on a ship in the North Atlantic finally when I couldn't get a laboring job I drifted in to straight commission sales I wasn't afraid to work but hard work didn't seem to be enough I made hundreds of calls without making any sales I used to run from office to office and from door to door so I could see more people but I was just barely hanging on by my fingernails and then one day I began to ask why is it that some salespeople are more successful than others I heard that the top 20% of salespeople in every field earned 80% of the money the top 10% earned even more so I did something that changed my life in the next sales booster I will tell you exactly what I did that enabled me to go from nothing and become one of the highest paid salespeople in my business now here's an exercise for you decide today that you're going to get into the top 20% of money earners in your business and then do whatever you need to do to get there see you next time 

@@ -1,0 +1,26 @@
+---
+notebook_id: d6ffa6fb-ce22-4e98-b77c-fc4cdd8fd057
+notebook_title: "Upward Communication"
+source_id: 28a31f91-0798-4f3d-a1d3-a64276976ec5
+source_title: "Succeeding in Sales The Smart Way | Brian Tracy"
+source_type: SourceType.YOUTUBE
+extracted_at: 2026-05-21 14:07:43 UTC
+extractor: nlm_bulk_extract.py
+---
+
+# Succeeding in Sales The Smart Way | Brian Tracy
+
+## NotebookLM-extracted transcript (Google's ASR + indexing)
+
+truthfulness is the real mark of integrity in a leader hello I'm Brian Tracy and today I want to talk to you about the importance of honesty and integrity in leadership having honesty and integrity in the workplace is one of the most important qualities of great leadership in business and I'm going to tell you why 
+whenever I hold a strategic planning session the first value that all the executives agree on is integrity leaders know that honesty and integrity are the foundations of leadership leaders stand up for they believe in 
+for example John Huntsman senior is a multi billionaire who started a chemical company from scratch and grew it into a twelve billion dollar enterprise his book winners never cheat is filled with stories taken from his own experience in which he steadfastly refused to compromise his principles Huntsman says that integrity is the reason why he has been as successful as he is there are no moral shortcuts in the game of business of life he writes there are basically three kinds of people the unsuccessful the temporarily successful and those who become and remain successful over the months and years the difference his character there are many examples of temporary winners who woman by cheating for a number of years 
+Enron was cited as one of America's most innovative and daring companies the CEO of the company knew the most important people in the country including the President of the United States except that an Ron's success was built on lies and the winners who headed the company are now case studies in the lack of integrity leaders with integrity may not be the most famous or flashy of leaders and they don't care 
+integrity means doing the right thing because 
+it is the right thing to do and that's what makes success so leaders keep their promises they give promises carefully even reluctantly but once they have given that promise they follow through on what they promise without failure and they always tell the truth Jack Welch called it candor he believes that if you are afraid of candor or straight talk then you don't have the guts to be an effective leader you are going to surround yourself with yes people who will say whatever you want to hear instead of saying the truth 
+leaders with integrity are not afraid to face the truth 
+this is called the reality principle or seeing the world as it really is not as you wish it to be it's perhaps the most important principle of leadership and dependent on integrity because it demands truthfulness and honesty at all times many companies and organizations fail because they don't follow the reality principle integrity means telling the truth even if the truth is ugly better to be honest than to delude others because then you are probably deluding yourself as well 
+leaders need to be courageous but they also need to be open to the idea that they could be wrong 
+there are many leaders who eventually fail because they refuse to question their own assumptions or conclusions there's a difference by the way between being confident and blind let's face it in today's world of rapid change there is a possibility that you aren't partially wrong or even completely wrong maybe you are not wrong but just opening yourself to that possibility is going to make you a more effective leader because it will open your mind to new ideas or new thinking there should be no exceptions to honesty and 
+integrity integrity is a state of mind and is not situational if you compromise your integrity in small situations with very few consequences then it becomes easier and easier for you to compromise on the big situations with major consequences leaders with integrity always err on the side of fairness especially when other people are unfair as a matter of fact the true mark of leadership is how fear you can be when other people are treating you unfairly if you enjoyed this video and feel it was valuable in teaching you about integrity and leadership share it with your friends or anyone else who might benefit from this information before we wrap up I'd like to leave you with a thought to share with your friends and followers truthfulness is the real mark of integrity in a leader so now I'd love to hear from you 
+so my question today is this is there any situation in your life where you are neglecting to act with perfect integrity in everything you say or do and if there is what are you going to do to change it leave a comment below and I'll be sure to follow up with you thanks for watching and remember if you want to change your future take action and take action now if you enjoyed this video and feel it was valuable in teaching you about integrity and leadership subscribe to my channel like this video and share this video with your friends and click the button on the screen for a free gift thanks again for watching
