@@ -15,22 +15,31 @@ OUT_DIR = Path(f"phase2-output/chunk-{CHUNK:02d}")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 LOG = OUT_DIR / "_chunk.log"
 
-PROMPT_TEMPLATE = """Extract structured intelligence from this YouTube video transcript. Use ONLY information explicitly in the transcript.
+PROMPT_TEMPLATE = """Extract EVERY piece of structured intelligence from this YouTube video transcript. Use ONLY information explicitly in the transcript. Capture EVERYTHING that matters — do not skip details to save space.
 
 ## URLs, handles, brands, products, people
-Every URL, social handle (@username), brand name, product name, software tool, person, or company explicitly mentioned. One per line.
+EVERY URL, social handle (@username), brand name, product name, software tool, person's name, company explicitly mentioned. Include every mention even if duplicated across the transcript. One per line.
 
-## 5 actionable takeaways
-Five specific, concrete actionable things a viewer should do. Imperative steps with exact tactics, numbers, frameworks, or thresholds.
+## ALL actionable takeaways
+EVERY specific, concrete, actionable thing a viewer should do based on this video. Not just the top 5 — list ALL of them, regardless of count. Each as an imperative step with exact tactics, numbers, frameworks, or thresholds. Skip platitudes only.
 
-## Frameworks, models, formulas
-Any named framework, mental model, formula, ratio, multi-step process, or system. Name it + one-line summary. If none, write "None mentioned."
+## Frameworks, models, formulas, processes
+EVERY named framework, mental model, formula, ratio, multi-step process, or system the speaker references. Name it + bullet list of the steps. Include even ones mentioned in passing.
 
-## Quoted dollar figures, metrics, case studies
-Specific numbers cited. Include context.
+## Quoted dollar figures, metrics, case studies, dates, statistics
+EVERY specific number cited: dollar amounts, percentages, conversion rates, time periods, dates, ages, counts, ratios, case-study results. Include context for each. Do not filter; capture all.
+
+## Key concepts, definitions, jargon
+Any technical term, concept, or domain-specific language the speaker uses + how they define it (if they do).
+
+## Quotes worth preserving
+Any short memorable phrase, principle, or line that's quote-worthy.
 
 ## Core thesis (one sentence)
 The single main claim or argument of this video, in ONE sentence.
+
+## Secondary themes
+Any other major topics, sub-arguments, or storylines woven through the transcript.
 
 ---
 
@@ -79,40 +88,70 @@ def main():
         transcript = extract_transcript(text)
         if len(transcript) < 80:
             continue
-        if len(transcript) > 80_000:
-            transcript = transcript[:80_000] + "\n[truncated]"
-        prompt = PROMPT_TEMPLATE.format(transcript=transcript)
 
-        enrichment = None
-        for retry in range(5):
-            try:
-                resp = client.chat.completions.create(
-                    model=model,
-                    messages=[{"role":"user", "content": prompt}],
-                    max_completion_tokens=2048,
-                    temperature=0.2,
-                )
-                enrichment = (resp.choices[0].message.content or "").strip()
-                if enrichment and len(enrichment) >= 100:
+        # NO COMPROMISE: split very long transcripts into chunks instead of truncating.
+        # llama-3.3-70b has 128K context (~96K tokens after prompt). Each char ~0.25 tokens.
+        # Safe limit: 300K chars per call. Above that, multi-pass and merge.
+        MAX_CHARS_PER_CALL = 300_000
+        chunks = []
+        if len(transcript) <= MAX_CHARS_PER_CALL:
+            chunks = [transcript]
+        else:
+            # split into ~250K char chunks with 5K overlap to preserve context
+            step = MAX_CHARS_PER_CALL - 5_000
+            for start in range(0, len(transcript), step):
+                chunks.append(transcript[start:start + MAX_CHARS_PER_CALL])
+
+        all_enrichments = []
+        chunk_failed = False
+        for chunk_i, chunk_text in enumerate(chunks):
+            prompt = PROMPT_TEMPLATE.format(transcript=chunk_text)
+            if len(chunks) > 1:
+                prompt = f"PART {chunk_i+1} of {len(chunks)} — combine with other parts later.\n\n" + prompt
+            chunk_enrichment = None
+            for retry in range(5):
+                try:
+                    resp = client.chat.completions.create(
+                        model=model,
+                        messages=[{"role":"user", "content": prompt}],
+                        max_completion_tokens=4096,  # more headroom for thorough extraction
+                        temperature=0.2,
+                    )
+                    chunk_enrichment = (resp.choices[0].message.content or "").strip()
+                    if chunk_enrichment and len(chunk_enrichment) >= 100:
+                        break
+                    chunk_enrichment = None
                     break
-                enrichment = None
-                break
-            except RateLimitError:
-                wait = 20 + retry*15
-                time.sleep(wait)
-                continue
-            except APIError as e:
-                err = str(e).lower()
-                if "context" in err or "token" in err:
-                    transcript = transcript[:40_000] + "\n[heavily truncated]"
-                    prompt = PROMPT_TEMPLATE.format(transcript=transcript)
-                    if retry < 2:
-                        continue
-                log(f"  APIErr {rel}: {str(e)[:120]}")
-                break
-            except Exception as e:
-                log(f"  Err: {type(e).__name__}: {str(e)[:100]}")
-                break
+                except RateLimitError:
+                    wait = 20 + retry*15
+                    time.sleep(wait)
+                    continue
+                except APIError as e:
+                    err = str(e).lower()
+                    if "context" in err or "token" in err:
+                        # last-resort: smaller chunk
+                        chunk_text = chunk_text[:int(len(chunk_text)*0.5)]
+                        prompt = PROMPT_TEMPLATE.format(transcript=chunk_text)
+                        if retry < 2:
+                            continue
+                    log(f"  APIErr {rel} chunk{chunk_i}: {str(e)[:120]}")
+                    break
+                except Exception as e:
+                    log(f"  Err {rel} chunk{chunk_i}: {type(e).__name__}: {str(e)[:100]}")
+                    break
+            if chunk_enrichment:
+                all_enrichments.append(chunk_enrichment)
+            else:
+                chunk_failed = True
+        if chunk_failed and not all_enrichments:
+            enrichment = None
+        elif len(all_enrichments) > 1:
+            enrichment = "\n\n---\n\n".join(
+                f"### Part {i+1} of {len(all_enrichments)}\n\n{e}"
+                for i, e in enumerate(all_enrichments)
+            )
+        else:
+            enrichment = all_enrichments[0] if all_enrichments else None
 
         if enrichment:
             appendix = (
