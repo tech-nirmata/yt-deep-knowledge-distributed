@@ -74,6 +74,10 @@ def main():
     ok = fail = 0
     started = time.time()
     quota_429_hits = 0
+    # PER-MODEL CIRCUIT BREAKER: after a model 429s N times across this chunk,
+    # mark it dead so future videos skip it immediately (no wasted retries)
+    model_dead = {}  # model_name -> True if exhausted
+    model_429_count = {}
 
     for i, row in enumerate(chunk_rows, 1):
         channel, url, vid = row[0], row[1], row[2]
@@ -83,14 +87,18 @@ def main():
             continue
 
         t0 = time.time()
-        # SPEED MODE: flash-lite-latest first (5-10x faster than pro, quality 3.00/3 per audit)
-        # fps=0.5 = half the frames analyzed = 2x faster, still captures all visual events
-        # If lite-latest fails, fall back to better models
-        models = ["gemini-flash-lite-latest", "gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-2.5-flash", "gemini-2.5-pro"]
-        FPS = 0.5
+        # NO COMPROMISE: pro (highest video quality) first, fall to flash if pro 429s.
+        # Per-chunk circuit breaker prevents wasting 135s+ per video on dead-Pro retries
+        # once Pro's daily quota (25/key/day) is exhausted.
+        # fps=1.0 = every frame analyzed = max visual capture (no quality loss).
+        models = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"]
+        FPS = 1.0
+        MAX_MODEL_429 = 3  # after 3 quota errors on a model, mark it dead for chunk
         result_text = None
         used_model = None
         for model in models:
+            if model_dead.get(model):
+                continue  # skip dead model — no time wasted
             for retry in range(3):
                 try:
                     resp = client.models.generate_content(
@@ -111,8 +119,13 @@ def main():
                     err = str(e)
                     if "429" in err or "RESOURCE_EXHAUSTED" in err:
                         quota_429_hits += 1
+                        model_429_count[model] = model_429_count.get(model, 0) + 1
+                        if model_429_count[model] >= MAX_MODEL_429:
+                            model_dead[model] = True
+                            log(f"  CIRCUIT-OPEN {model} (3+ quota errors) — skipping for rest of chunk")
+                            break  # exit retry loop, will move to next model
                         if retry < 2:
-                            time.sleep(45 + retry * 30)
+                            time.sleep(15 + retry * 15)  # shorter waits — quota won't recover in this chunk
                             continue
                         break
                     if "1048576" in err or "exceeds" in err.lower():
