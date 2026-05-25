@@ -1,4 +1,4 @@
-name: Phase 4 SELF-HOSTED (4 Mac runners, parallel to cloud)
+name: Phase 4 SELF-HOSTED (8 Mac runners, parallel to cloud)
 
 on:
   workflow_dispatch:
@@ -9,9 +9,9 @@ jobs:
     timeout-minutes: 600
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 8
       matrix:
-        chunk: [0,1,2,3]
+        chunk: [0,1,2,3,4,5,6,7]
     steps:
       - uses: actions/checkout@v4
 
@@ -36,7 +36,7 @@ jobs:
       - name: Process chunk
         env:
           CHUNK_INDEX: ${{ matrix.chunk }}
-          TOTAL_CHUNKS: 4
+          TOTAL_CHUNKS: 8
           GEMINI_API_KEY: ${{ env.GEMINI_API_KEY }}
           PYTHONUNBUFFERED: "1"
         run: |
