@@ -1,0 +1,54 @@
+name: Phase 4 SELF-HOSTED (4 Mac runners, parallel to cloud)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  process:
+    runs-on: [self-hosted, parth-mac]
+    timeout-minutes: 600
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        chunk: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use system Python
+        run: |
+          which python3
+          python3 --version
+
+      - name: Install deps
+        run: |
+          python3 -m pip install --user --break-system-packages google-genai 2>/dev/null || python3 -m pip install --user google-genai
+
+      - name: Pick Gemini key based on chunk index
+        env:
+          GEMINI_KEYS_JSON: ${{ secrets.GEMINI_KEYS_JSON }}
+          CHUNK_INDEX: ${{ matrix.chunk }}
+        run: |
+          KEY=$(echo "$GEMINI_KEYS_JSON" | python3 -c "import json,sys,os; keys=json.load(sys.stdin); idx=int(os.environ['CHUNK_INDEX']) % len(keys); print(keys[idx])")
+          echo "::add-mask::$KEY"
+          echo "GEMINI_API_KEY=$KEY" >> "$GITHUB_ENV"
+
+      - name: Process chunk
+        env:
+          CHUNK_INDEX: ${{ matrix.chunk }}
+          TOTAL_CHUNKS: 4
+          GEMINI_API_KEY: ${{ env.GEMINI_API_KEY }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python3 pipeline/phase4_chunk.py
+
+      - name: Upload results as artifact
+        if: always()
+        env:
+          CHUNK_INDEX: ${{ matrix.chunk }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase4-selfhosted-chunk-${{ matrix.chunk }}
+          path: results/
+          if-no-files-found: warn
+          retention-days: 7
