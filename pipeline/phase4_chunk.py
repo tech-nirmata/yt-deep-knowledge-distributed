@@ -87,11 +87,11 @@ def main():
             continue
 
         t0 = time.time()
-        # NO COMPROMISE: pro (highest video quality) first, fall to flash if pro 429s.
-        # Per-chunk circuit breaker prevents wasting 135s+ per video on dead-Pro retries
-        # once Pro's daily quota (25/key/day) is exhausted.
+        # NO COMPROMISE: highest-quality FREE models. Pro removed (paid-only since April 2026 per Google).
+        # Flash is now the highest free-tier visual model — still excellent quality.
+        # Per-chunk circuit breaker prevents wasting time on quota-dead models.
         # fps=1.0 = every frame analyzed = max visual capture (no quality loss).
-        models = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"]
+        models = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"]
         FPS = 1.0
         MAX_MODEL_429 = 3  # after 3 quota errors on a model, mark it dead for chunk
         result_text = None
