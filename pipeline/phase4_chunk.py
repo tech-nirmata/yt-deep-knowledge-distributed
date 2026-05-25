@@ -83,9 +83,11 @@ def main():
             continue
 
         t0 = time.time()
-        # NO COMPROMISE: pro (best vision) > flash > flash-latest > flash-lite
-        # fps=1.0 default (every frame); on token limit, segment instead of dropping fps
-        models = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"]
+        # SPEED MODE: flash-lite-latest first (5-10x faster than pro, quality 3.00/3 per audit)
+        # fps=0.5 = half the frames analyzed = 2x faster, still captures all visual events
+        # If lite-latest fails, fall back to better models
+        models = ["gemini-flash-lite-latest", "gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-2.5-flash", "gemini-2.5-pro"]
+        FPS = 0.5
         result_text = None
         used_model = None
         for model in models:
@@ -95,7 +97,7 @@ def main():
                         model=model,
                         contents=gtypes.Content(parts=[
                             gtypes.Part(file_data=gtypes.FileData(file_uri=url, mime_type="video/mp4"),
-                                       video_metadata=gtypes.VideoMetadata(fps=1.0)),
+                                       video_metadata=gtypes.VideoMetadata(fps=FPS)),
                             gtypes.Part(text=PROMPT),
                         ]),
                     )
@@ -126,7 +128,7 @@ def main():
                                     contents=gtypes.Content(parts=[
                                         gtypes.Part(file_data=gtypes.FileData(file_uri=url, mime_type="video/mp4"),
                                                    video_metadata=gtypes.VideoMetadata(
-                                                       fps=1.0,
+                                                       fps=FPS,
                                                        start_offset=f"{seg_start}s",
                                                        end_offset=f"{seg_end}s",
                                                    )),
