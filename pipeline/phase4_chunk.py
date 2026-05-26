@@ -76,10 +76,14 @@ Distinctive moments where energy or gesture significantly changes meaning. Skip 
 If video is truly talking-head with zero meaningful visuals beyond speaker's face: write a single sentence saying so and stop."""
 
 # Per-process global state for circuit breakers
-# dead_combo[(key_idx, model)] = True means this (key, model) pair is quota-exhausted for this chunk
-_dead_combo = {}
-_429_combo_count = {}
-MAX_COMBO_429 = 2  # mark (key,model) dead after this many 429s
+# _cooldown_until[(key_idx, model)] = unix-ts to skip until.
+# Per-minute Gemini RPM limits heal in 60s, so we use a 90s cooldown after N 429s.
+# Per-day RPD limits don't heal within the chunk run, but if cooldown re-tests
+# get hit again immediately, the cooldown re-extends — natural backoff.
+_cooldown_until = {}
+_429_combo_count = {}  # rolling count per (key,model); resets on success
+MAX_COMBO_429 = 2  # after this many consecutive 429s, enter cooldown
+COOLDOWN_S = 90  # seconds to skip a (key, model) after MAX_COMBO_429
 MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"]
 FPS = 1.0
 
@@ -100,24 +104,43 @@ def get_client(api_key: str) -> "genai.Client":
     return _client_cache[api_key]
 
 
-def is_dead(key_idx: int, model: str) -> bool:
-    return _dead_combo.get((key_idx, model), False)
+def in_cooldown(key_idx: int, model: str) -> bool:
+    """True if this (key, model) is in cooldown right now."""
+    until = _cooldown_until.get((key_idx, model), 0)
+    return time.time() < until
 
 
-def mark_dead(key_idx: int, model: str, key_suffix: str):
-    if not _dead_combo.get((key_idx, model)):
-        _dead_combo[(key_idx, model)] = True
-        log(f"  CIRCUIT-OPEN key=***{key_suffix} model={model} ({MAX_COMBO_429}+ quota errors) — skipping for rest of chunk")
+def mark_cooldown(key_idx: int, model: str, key_suffix: str):
+    """Put (key, model) in cooldown for COOLDOWN_S seconds."""
+    _cooldown_until[(key_idx, model)] = time.time() + COOLDOWN_S
+    _429_combo_count[(key_idx, model)] = 0  # reset count; will re-trip if cooldown wasn't enough
+    log(f"  COOLDOWN key=***{key_suffix} model={model} ({MAX_COMBO_429}+ quota) — skip {COOLDOWN_S}s")
 
 
-def all_dead_for_model(model: str) -> bool:
-    """True if every key has this model marked dead."""
-    return all(_dead_combo.get((i, model), False) for i in range(len(ALL_KEYS)))
+def all_models_cooling(model: str) -> bool:
+    """True if every key has this model cooling down."""
+    return all(in_cooldown(i, model) for i in range(len(ALL_KEYS)))
 
 
-def all_combos_dead() -> bool:
-    """True if every (key, model) combo is dead."""
-    return all(_dead_combo.get((i, m), False) for i in range(len(ALL_KEYS)) for m in MODELS)
+def all_combos_cooling() -> bool:
+    """True if every (key, model) combo is cooling down."""
+    now = time.time()
+    return all(
+        _cooldown_until.get((i, m), 0) > now
+        for i in range(len(ALL_KEYS))
+        for m in MODELS
+    )
+
+
+def min_cooldown_wait() -> float:
+    """Seconds until the earliest cooldown expires (>=0). Used when all combos cooling."""
+    now = time.time()
+    earliest = min(
+        _cooldown_until.get((i, m), now)
+        for i in range(len(ALL_KEYS))
+        for m in MODELS
+    )
+    return max(0.0, earliest - now)
 
 
 def try_video(url: str, vid: str, start_key_idx: int) -> tuple[str | None, str | None]:
@@ -131,11 +154,11 @@ def try_video(url: str, vid: str, start_key_idx: int) -> tuple[str | None, str |
     """
     n_keys = len(ALL_KEYS)
     for model in MODELS:
-        if all_dead_for_model(model):
+        if all_models_cooling(model):
             continue
         for key_offset in range(n_keys):
             key_idx = (start_key_idx + key_offset) % n_keys
-            if is_dead(key_idx, model):
+            if in_cooldown(key_idx, model):
                 continue
             api_key = ALL_KEYS[key_idx]
             key_suffix = api_key[-6:]
@@ -154,6 +177,8 @@ def try_video(url: str, vid: str, start_key_idx: int) -> tuple[str | None, str |
                     )
                     text = (resp.text or "").strip()
                     if len(text) >= 100:
+                        # reset 429 count on success
+                        _429_combo_count[(key_idx, model)] = 0
                         return text, f"{model} (key=***{key_suffix})"
                     # short/empty response — break retry loop, try next (key, model)
                     break
@@ -163,7 +188,7 @@ def try_video(url: str, vid: str, start_key_idx: int) -> tuple[str | None, str |
                         ckey = (key_idx, model)
                         _429_combo_count[ckey] = _429_combo_count.get(ckey, 0) + 1
                         if _429_combo_count[ckey] >= MAX_COMBO_429:
-                            mark_dead(key_idx, model, key_suffix)
+                            mark_cooldown(key_idx, model, key_suffix)
                             break  # try next key for same model
                         time.sleep(5)  # short backoff before next attempt on same key+model
                         continue
@@ -172,6 +197,7 @@ def try_video(url: str, vid: str, start_key_idx: int) -> tuple[str | None, str |
                         log(f"  long video — segmenting {vid} via key=***{key_suffix} model={model}")
                         seg_result = try_segmented(client, model, url, key_suffix)
                         if seg_result:
+                            _429_combo_count[(key_idx, model)] = 0
                             return seg_result, f"{model} segmented (key=***{key_suffix})"
                         break  # segmentation failed too — try next (key, model)
                     # other client error — non-recoverable on this combo
@@ -255,11 +281,12 @@ def main():
             log(f"[{i}/{len(chunk_rows)}] SKIP {vid} (already done)")
             continue
 
-        # short-circuit: if every (key, model) combo is dead, no point trying further
-        if all_combos_dead():
-            fail += 1
-            log(f"[{i}/{len(chunk_rows)}] FAIL-NOQUOTA {vid} (all key+model combos exhausted)")
-            continue
+        # short-circuit: if every (key, model) combo is cooling, wait until one expires
+        if all_combos_cooling():
+            wait_s = min_cooldown_wait()
+            if wait_s > 0:
+                log(f"[{i}/{len(chunk_rows)}] WAIT-COOLDOWN {vid} sleeping {wait_s:.0f}s (all combos cooling)")
+                time.sleep(min(wait_s + 1, 120))  # cap at 2 min to keep moving
 
         t0 = time.time()
         # rotate starting key per video to spread load further within chunk
@@ -288,17 +315,18 @@ _via {used_model} on GitHub Actions runner_
             ok += 1
             if ok % 5 == 0:
                 avg = (time.time() - started) / ok
-                # count dead combos for visibility
-                dead_n = sum(1 for v in _dead_combo.values() if v)
-                log(f"[{i}/{len(chunk_rows)}] OK {used_model} {dt:.0f}s {vid} (ok={ok} fail={fail} avg={avg:.0f}s dead={dead_n}/{n_keys * len(MODELS)})")
+                now = time.time()
+                cooling_n = sum(1 for v in _cooldown_until.values() if v > now)
+                log(f"[{i}/{len(chunk_rows)}] OK {used_model} {dt:.0f}s {vid} (ok={ok} fail={fail} avg={avg:.0f}s cooling={cooling_n}/{n_keys * len(MODELS)})")
         else:
             fail += 1
             log(f"[{i}/{len(chunk_rows)}] FAIL {vid}")
 
         time.sleep(2)
 
-    dead_n = sum(1 for v in _dead_combo.values() if v)
-    log(f"DONE chunk {CHUNK}: ok={ok} fail={fail} dead_combos={dead_n}/{n_keys * len(MODELS)} elapsed={time.time()-started:.0f}s")
+    now = time.time()
+    cooling_n = sum(1 for v in _cooldown_until.values() if v > now)
+    log(f"DONE chunk {CHUNK}: ok={ok} fail={fail} cooling={cooling_n}/{n_keys * len(MODELS)} elapsed={time.time()-started:.0f}s")
     return 0
 
 
