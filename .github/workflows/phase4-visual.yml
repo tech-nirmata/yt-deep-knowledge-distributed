@@ -9,9 +9,9 @@ jobs:
     timeout-minutes: 350
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 24
       matrix:
-        chunk: [0,1,2,3,4,5,6,7,8,9,10,11]
+        chunk: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
     steps:
       - uses: actions/checkout@v4
 
@@ -27,11 +27,11 @@ jobs:
       - name: Process chunk (multi-key rotation, RPM-aware)
         env:
           CHUNK_INDEX: ${{ matrix.chunk }}
-          TOTAL_CHUNKS: 12
+          TOTAL_CHUNKS: 24
           GEMINI_KEYS_JSON: ${{ secrets.GEMINI_KEYS_JSON }}
         run: |
           # stagger chunk starts to avoid thundering herd on shared API quota
-          sleep $((CHUNK_INDEX * 8))
+          sleep $((CHUNK_INDEX * 5))
           # mask each key in logs
           python3 -c "import json,os; [print('::add-mask::'+k) for k in json.loads(os.environ['GEMINI_KEYS_JSON'])]"
           python pipeline/phase4_chunk.py
