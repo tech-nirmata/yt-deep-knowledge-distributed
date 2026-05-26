@@ -11,6 +11,7 @@ KEY ROTATION (no compromise on quality):
   - Per-chunk circuit breaker tracks dead (key, model) combos to avoid retrying exhausted slots
   - Starting offset = CHUNK_INDEX % len(keys) → distributes load across chunks
 """
+from __future__ import annotations  # PEP 604 X|None syntax usable on py3.9
 import os, sys, time, json, signal, hashlib
 from pathlib import Path
 from google import genai
