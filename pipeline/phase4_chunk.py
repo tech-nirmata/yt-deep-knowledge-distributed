@@ -3,6 +3,13 @@
 Phase 4 chunk processor — runs on a single GitHub Actions runner.
 Reads queue/phase4-remaining.tsv, processes its slice based on CHUNK_INDEX
 and TOTAL_CHUNKS env vars, outputs results to results/<chunk>/.
+
+KEY ROTATION (no compromise on quality):
+  - Chunk receives ALL keys via GEMINI_KEYS_JSON env var (preferred)
+  - Falls back to single-key GEMINI_API_KEY for backward compat
+  - For each video, rotates through (key, model) combos until one succeeds
+  - Per-chunk circuit breaker tracks dead (key, model) combos to avoid retrying exhausted slots
+  - Starting offset = CHUNK_INDEX % len(keys) → distributes load across chunks
 """
 import os, sys, time, json, signal, hashlib
 from pathlib import Path
@@ -11,7 +18,24 @@ from google.genai import types as gtypes, errors as gerrors
 
 CHUNK = int(os.environ["CHUNK_INDEX"])
 TOTAL = int(os.environ["TOTAL_CHUNKS"])
-KEY = os.environ["GEMINI_API_KEY"]
+
+# Multi-key rotation: prefer GEMINI_KEYS_JSON, fall back to GEMINI_API_KEY
+_KEYS_JSON = os.environ.get("GEMINI_KEYS_JSON", "").strip()
+if _KEYS_JSON:
+    try:
+        ALL_KEYS = json.loads(_KEYS_JSON)
+        if not isinstance(ALL_KEYS, list) or not ALL_KEYS:
+            raise ValueError("GEMINI_KEYS_JSON must be a non-empty array")
+    except (json.JSONDecodeError, ValueError) as e:
+        print(f"FATAL: invalid GEMINI_KEYS_JSON: {e}", flush=True)
+        sys.exit(2)
+else:
+    _single = os.environ.get("GEMINI_API_KEY", "").strip()
+    if not _single:
+        print("FATAL: neither GEMINI_KEYS_JSON nor GEMINI_API_KEY set", flush=True)
+        sys.exit(2)
+    ALL_KEYS = [_single]
+
 QUEUE = Path("queue/phase4-remaining.tsv")
 OUT_DIR = Path(f"results/chunk-{CHUNK:02d}")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -50,10 +74,157 @@ Distinctive moments where energy or gesture significantly changes meaning. Skip 
 
 If video is truly talking-head with zero meaningful visuals beyond speaker's face: write a single sentence saying so and stop."""
 
+# Per-process global state for circuit breakers
+# dead_combo[(key_idx, model)] = True means this (key, model) pair is quota-exhausted for this chunk
+_dead_combo = {}
+_429_combo_count = {}
+MAX_COMBO_429 = 2  # mark (key,model) dead after this many 429s
+MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"]
+FPS = 1.0
+
+# Reusable client cache: api_key -> genai.Client
+_client_cache = {}
+
+
 def log(msg):
     line = f"[{time.strftime('%H:%M:%S')} c{CHUNK}] {msg}"
     print(line, flush=True)
-    with LOG.open("a") as f: f.write(line + "\n")
+    with LOG.open("a") as f:
+        f.write(line + "\n")
+
+
+def get_client(api_key: str) -> "genai.Client":
+    if api_key not in _client_cache:
+        _client_cache[api_key] = genai.Client(api_key=api_key)
+    return _client_cache[api_key]
+
+
+def is_dead(key_idx: int, model: str) -> bool:
+    return _dead_combo.get((key_idx, model), False)
+
+
+def mark_dead(key_idx: int, model: str, key_suffix: str):
+    if not _dead_combo.get((key_idx, model)):
+        _dead_combo[(key_idx, model)] = True
+        log(f"  CIRCUIT-OPEN key=***{key_suffix} model={model} ({MAX_COMBO_429}+ quota errors) — skipping for rest of chunk")
+
+
+def all_dead_for_model(model: str) -> bool:
+    """True if every key has this model marked dead."""
+    return all(_dead_combo.get((i, model), False) for i in range(len(ALL_KEYS)))
+
+
+def all_combos_dead() -> bool:
+    """True if every (key, model) combo is dead."""
+    return all(_dead_combo.get((i, m), False) for i in range(len(ALL_KEYS)) for m in MODELS)
+
+
+def try_video(url: str, vid: str, start_key_idx: int) -> tuple[str | None, str | None]:
+    """
+    Try to analyze video. Rotates through (key, model) combos.
+    Returns (result_text, used_model_label) or (None, None) on total failure.
+
+    Strategy: for each MODEL (priority order), try each key starting from start_key_idx.
+    Within a (key, model), retry up to 3 times on transient errors.
+    Mark (key, model) dead after MAX_COMBO_429 quota errors.
+    """
+    n_keys = len(ALL_KEYS)
+    for model in MODELS:
+        if all_dead_for_model(model):
+            continue
+        for key_offset in range(n_keys):
+            key_idx = (start_key_idx + key_offset) % n_keys
+            if is_dead(key_idx, model):
+                continue
+            api_key = ALL_KEYS[key_idx]
+            key_suffix = api_key[-6:]
+            client = get_client(api_key)
+            for retry in range(3):
+                try:
+                    resp = client.models.generate_content(
+                        model=model,
+                        contents=gtypes.Content(parts=[
+                            gtypes.Part(
+                                file_data=gtypes.FileData(file_uri=url, mime_type="video/mp4"),
+                                video_metadata=gtypes.VideoMetadata(fps=FPS),
+                            ),
+                            gtypes.Part(text=PROMPT),
+                        ]),
+                    )
+                    text = (resp.text or "").strip()
+                    if len(text) >= 100:
+                        return text, f"{model} (key=***{key_suffix})"
+                    # short/empty response — break retry loop, try next (key, model)
+                    break
+                except gerrors.ClientError as e:
+                    err = str(e)
+                    if "429" in err or "RESOURCE_EXHAUSTED" in err:
+                        ckey = (key_idx, model)
+                        _429_combo_count[ckey] = _429_combo_count.get(ckey, 0) + 1
+                        if _429_combo_count[ckey] >= MAX_COMBO_429:
+                            mark_dead(key_idx, model, key_suffix)
+                            break  # try next key for same model
+                        time.sleep(5)  # short backoff before next attempt on same key+model
+                        continue
+                    if "1048576" in err or "exceeds" in err.lower():
+                        # long video — fall through to segmented path
+                        log(f"  long video — segmenting {vid} via key=***{key_suffix} model={model}")
+                        seg_result = try_segmented(client, model, url, key_suffix)
+                        if seg_result:
+                            return seg_result, f"{model} segmented (key=***{key_suffix})"
+                        break  # segmentation failed too — try next (key, model)
+                    # other client error — non-recoverable on this combo
+                    break
+                except gerrors.ServerError:
+                    if retry < 2:
+                        time.sleep(20)
+                        continue
+                    break
+                except Exception as e:
+                    log(f"  unexpected on key=***{key_suffix} model={model}: {type(e).__name__}: {str(e)[:100]}")
+                    break
+    return None, None
+
+
+def try_segmented(client, model: str, url: str, key_suffix: str) -> str | None:
+    """Process video in 30-min segments up to 2h, merge results."""
+    segments = []
+    try:
+        for seg_start in range(0, 7200, 1800):
+            seg_end = seg_start + 1800
+            try:
+                seg_resp = client.models.generate_content(
+                    model=model,
+                    contents=gtypes.Content(parts=[
+                        gtypes.Part(
+                            file_data=gtypes.FileData(file_uri=url, mime_type="video/mp4"),
+                            video_metadata=gtypes.VideoMetadata(
+                                fps=FPS,
+                                start_offset=f"{seg_start}s",
+                                end_offset=f"{seg_end}s",
+                            ),
+                        ),
+                        gtypes.Part(text=PROMPT),
+                    ]),
+                )
+            except Exception as se:
+                log(f"  segment err key=***{key_suffix}: {str(se)[:100]}")
+                if not segments:
+                    return None
+                break
+            seg_t = (seg_resp.text or "").strip()
+            if seg_t and len(seg_t) >= 80:
+                segments.append(f"### Segment {seg_start}s-{seg_end}s\n\n{seg_t}")
+            elif not segments:
+                return None
+            else:
+                break
+        if segments:
+            return "\n\n".join(segments)
+    except Exception:
+        return None
+    return None
+
 
 def load_queue():
     rows = []
@@ -61,23 +232,20 @@ def load_queue():
         for line in f:
             parts = line.rstrip().split("\t")
             if len(parts) >= 3:
-                rows.append(parts)  # [channel, url, vid, priority?]
+                rows.append(parts)
     return rows
+
 
 def main():
     all_rows = load_queue()
-    # split into TOTAL chunks, take chunk CHUNK
     chunk_rows = [r for i, r in enumerate(all_rows) if i % TOTAL == CHUNK]
-    log(f"start — total queue={len(all_rows)} my chunk={len(chunk_rows)} key=***{KEY[-6:]}")
+    n_keys = len(ALL_KEYS)
+    start_key_idx = CHUNK % n_keys
+    log(f"start — total queue={len(all_rows)} my chunk={len(chunk_rows)} keys={n_keys} start_key_idx={start_key_idx}")
 
-    client = genai.Client(api_key=KEY)
     ok = fail = 0
     started = time.time()
     quota_429_hits = 0
-    # PER-MODEL CIRCUIT BREAKER: after a model 429s N times across this chunk,
-    # mark it dead so future videos skip it immediately (no wasted retries)
-    model_dead = {}  # model_name -> True if exhausted
-    model_429_count = {}
 
     for i, row in enumerate(chunk_rows, 1):
         channel, url, vid = row[0], row[1], row[2]
@@ -86,94 +254,18 @@ def main():
             log(f"[{i}/{len(chunk_rows)}] SKIP {vid} (already done)")
             continue
 
-        t0 = time.time()
-        # NO COMPROMISE: highest-quality FREE models. Pro removed (paid-only since April 2026 per Google).
-        # Flash is now the highest free-tier visual model — still excellent quality.
-        # Per-chunk circuit breaker prevents wasting time on quota-dead models.
-        # fps=1.0 = every frame analyzed = max visual capture (no quality loss).
-        models = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"]
-        FPS = 1.0
-        MAX_MODEL_429 = 3  # after 3 quota errors on a model, mark it dead for chunk
-        result_text = None
-        used_model = None
-        for model in models:
-            if model_dead.get(model):
-                continue  # skip dead model — no time wasted
-            for retry in range(3):
-                try:
-                    resp = client.models.generate_content(
-                        model=model,
-                        contents=gtypes.Content(parts=[
-                            gtypes.Part(file_data=gtypes.FileData(file_uri=url, mime_type="video/mp4"),
-                                       video_metadata=gtypes.VideoMetadata(fps=FPS)),
-                            gtypes.Part(text=PROMPT),
-                        ]),
-                    )
-                    t = (resp.text or "").strip()
-                    if len(t) >= 100:
-                        result_text = t
-                        used_model = model
-                        break
-                    break
-                except gerrors.ClientError as e:
-                    err = str(e)
-                    if "429" in err or "RESOURCE_EXHAUSTED" in err:
-                        quota_429_hits += 1
-                        model_429_count[model] = model_429_count.get(model, 0) + 1
-                        if model_429_count[model] >= MAX_MODEL_429:
-                            model_dead[model] = True
-                            log(f"  CIRCUIT-OPEN {model} (3+ quota errors) — skipping for rest of chunk")
-                            break  # exit retry loop, will move to next model
-                        if retry < 2:
-                            time.sleep(15 + retry * 15)  # shorter waits — quota won't recover in this chunk
-                            continue
-                        break
-                    if "1048576" in err or "exceeds" in err.lower():
-                        # too long — try segmented analysis: process video in 30-min chunks
-                        # via startOffset/endOffset, then merge results
-                        log(f"  long video — segmenting {vid}")
-                        try:
-                            segments = []
-                            for seg_start in range(0, 7200, 1800):  # up to 2h, 30-min segments
-                                seg_end = seg_start + 1800
-                                seg_resp = client.models.generate_content(
-                                    model=model,
-                                    contents=gtypes.Content(parts=[
-                                        gtypes.Part(file_data=gtypes.FileData(file_uri=url, mime_type="video/mp4"),
-                                                   video_metadata=gtypes.VideoMetadata(
-                                                       fps=FPS,
-                                                       start_offset=f"{seg_start}s",
-                                                       end_offset=f"{seg_end}s",
-                                                   )),
-                                        gtypes.Part(text=PROMPT),
-                                    ]),
-                                )
-                                seg_t = (seg_resp.text or "").strip()
-                                if seg_t and len(seg_t) >= 80:
-                                    segments.append(f"### Segment {seg_start}s-{seg_end}s\n\n{seg_t}")
-                                elif not segments:
-                                    break  # first segment empty = video shorter than 30min, fallback won't help
-                                else:
-                                    break  # reached end of video
-                            if segments:
-                                result_text = "\n\n".join(segments)
-                                used_model = model + f" (segmented {len(segments)} parts)"
-                                break
-                        except Exception as e2:
-                            log(f"  segment err: {str(e2)[:100]}")
-                    break
-                except gerrors.ServerError as e:
-                    if retry < 2:
-                        time.sleep(20)
-                        continue
-                    break
-                except Exception as e:
-                    log(f"  unexpected: {type(e).__name__}: {str(e)[:120]}")
-                    break
-            if result_text:
-                break
+        # short-circuit: if every (key, model) combo is dead, no point trying further
+        if all_combos_dead():
+            fail += 1
+            log(f"[{i}/{len(chunk_rows)}] FAIL-NOQUOTA {vid} (all key+model combos exhausted)")
+            continue
 
+        t0 = time.time()
+        # rotate starting key per video to spread load further within chunk
+        rotate_offset = (start_key_idx + i) % n_keys
+        result_text, used_model = try_video(url, vid, rotate_offset)
         dt = time.time() - t0
+
         if result_text:
             header = f"""---
 chunk: {CHUNK}
@@ -195,16 +287,19 @@ _via {used_model} on GitHub Actions runner_
             ok += 1
             if ok % 5 == 0:
                 avg = (time.time() - started) / ok
-                log(f"[{i}/{len(chunk_rows)}] OK {used_model} {dt:.0f}s {vid} (ok={ok} fail={fail} avg={avg:.0f}s 429s={quota_429_hits})")
+                # count dead combos for visibility
+                dead_n = sum(1 for v in _dead_combo.values() if v)
+                log(f"[{i}/{len(chunk_rows)}] OK {used_model} {dt:.0f}s {vid} (ok={ok} fail={fail} avg={avg:.0f}s dead={dead_n}/{n_keys * len(MODELS)})")
         else:
             fail += 1
             log(f"[{i}/{len(chunk_rows)}] FAIL {vid}")
 
-        # gentle pacing — GitHub IP is fresh, less throttled, but be polite
         time.sleep(2)
 
-    log(f"DONE chunk {CHUNK}: ok={ok} fail={fail} elapsed={time.time()-started:.0f}s")
+    dead_n = sum(1 for v in _dead_combo.values() if v)
+    log(f"DONE chunk {CHUNK}: ok={ok} fail={fail} dead_combos={dead_n}/{n_keys * len(MODELS)} elapsed={time.time()-started:.0f}s")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

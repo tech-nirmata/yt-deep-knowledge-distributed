@@ -24,22 +24,14 @@ jobs:
         run: |
           python3 -m pip install --user --break-system-packages google-genai 2>/dev/null || python3 -m pip install --user google-genai
 
-      - name: Pick Gemini key based on chunk index
-        env:
-          GEMINI_KEYS_JSON: ${{ secrets.GEMINI_KEYS_JSON }}
-          CHUNK_INDEX: ${{ matrix.chunk }}
-        run: |
-          KEY=$(echo "$GEMINI_KEYS_JSON" | python3 -c "import json,sys,os; keys=json.load(sys.stdin); idx=int(os.environ['CHUNK_INDEX']) % len(keys); print(keys[idx])")
-          echo "::add-mask::$KEY"
-          echo "GEMINI_API_KEY=$KEY" >> "$GITHUB_ENV"
-
-      - name: Process chunk
+      - name: Process chunk (multi-key rotation)
         env:
           CHUNK_INDEX: ${{ matrix.chunk }}
           TOTAL_CHUNKS: 8
-          GEMINI_API_KEY: ${{ env.GEMINI_API_KEY }}
+          GEMINI_KEYS_JSON: ${{ secrets.GEMINI_KEYS_JSON }}
           PYTHONUNBUFFERED: "1"
         run: |
+          python3 -c "import json,os; [print('::add-mask::'+k) for k in json.loads(os.environ['GEMINI_KEYS_JSON'])]"
           python3 pipeline/phase4_chunk.py
 
       - name: Upload results as artifact
