@@ -2,6 +2,12 @@ name: Phase 4 — Gemini visual analysis (60 parallel runners, no compromise)
 
 on:
   workflow_dispatch:
+  schedule:
+    # Self-sustaining: GitHub fires this every 6h regardless of whether the
+    # local Mac is awake. Keeps producing artifacts even if the dispatcher
+    # (which merges + trims the queue) misses a cycle. Re-processing already-done
+    # vids is idempotent — mild quota waste, never a full stall.
+    - cron: '0 1,7,13,19 * * *'
 
 jobs:
   process:
