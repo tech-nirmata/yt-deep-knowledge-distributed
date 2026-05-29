@@ -3,11 +3,18 @@ name: Phase 4 — Gemini visual analysis (60 parallel runners, no compromise)
 on:
   workflow_dispatch:
   schedule:
-    # Self-sustaining: GitHub fires this every 6h regardless of whether the
-    # local Mac is awake. Keeps producing artifacts even if the dispatcher
-    # (which merges + trims the queue) misses a cycle. Re-processing already-done
-    # vids is idempotent — mild quota waste, never a full stall.
-    - cron: '0 1,7,13,19 * * *'
+    # Self-sustaining: GitHub fires this every 12h regardless of whether the
+    # local Mac is awake. 12h (not 6h) because each run takes ~5.8h — 6h spacing
+    # caused overlapping runs that processed the SAME queue slices (82% dupes
+    # observed). 12h ensures one run fully finishes + dispatcher trims the queue
+    # before the next fires.
+    - cron: '0 8,20 * * *'
+
+# Only one cloud run at a time. If a new run is triggered while one is active,
+# the new one waits (does NOT cancel the running one). Eliminates dupe-work.
+concurrency:
+  group: phase4-visual-cloud
+  cancel-in-progress: false
 
 jobs:
   process:
