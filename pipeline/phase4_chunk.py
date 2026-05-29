@@ -89,7 +89,22 @@ _cooldown_until = {}
 _429_combo_count = {}  # rolling count per (key,model); resets on success
 MAX_COMBO_429 = 2  # after this many consecutive 429s, enter cooldown
 COOLDOWN_S = 90  # seconds to skip a (key, model) after MAX_COMBO_429
-MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-flash-lite-latest"]
+# Free quota is per-MODEL-per-project-per-day, so EACH model id is a separate daily bucket.
+# Rotating more model ids = more daily capacity on the SAME keys (no new keys/accounts/bans).
+# Ordered best→fallback so every video gets the strongest model that still has quota (no quality
+# compromise); cooldown breaker drops to the next only when one is exhausted. All are multimodal
+# and accept a YouTube URL server-side (verified gemini-3.1-flash-lite live). 2.0 family excluded
+# to hold quality. 4 flash + 4 flash-lite = 8 buckets ≈ 2x the old 4-model capacity.
+MODELS = [
+    "gemini-2.5-flash",            # proven workhorse, strong + fast
+    "gemini-3.5-flash",            # newest flagship flash
+    "gemini-3-flash-preview",      # high quality (slower; lower priority)
+    "gemini-flash-latest",         # alias → current flash
+    "gemini-3.1-flash-lite",       # verified: YouTube video, 9s, accurate
+    "gemini-2.5-flash-lite",
+    "gemini-flash-lite-latest",
+    "gemini-3.1-flash-lite-preview",
+]
 FPS = 1.0
 
 # Reusable client cache: api_key -> genai.Client
