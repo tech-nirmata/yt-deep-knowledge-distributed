@@ -19,6 +19,11 @@ from google.genai import types as gtypes, errors as gerrors
 
 CHUNK = int(os.environ["CHUNK_INDEX"])
 TOTAL = int(os.environ["TOTAL_CHUNKS"])
+# Multi-account partitioning: each GitHub account processes a disjoint HALF of the
+# queue so two accounts' 20-job pools ~2x throughput with ZERO duplicate work.
+# Backward compatible: NUM_HALVES=1 + HALF=0 (defaults) → original whole-queue behavior.
+HALF = int(os.environ.get("HALF", "0"))
+NUM_HALVES = int(os.environ.get("NUM_HALVES", "1"))
 
 # Multi-key rotation: prefer GEMINI_KEYS_JSON, fall back to GEMINI_API_KEY
 _KEYS_JSON = os.environ.get("GEMINI_KEYS_JSON", "").strip()
@@ -265,7 +270,10 @@ def load_queue():
 
 def main():
     all_rows = load_queue()
-    chunk_rows = [r for i, r in enumerate(all_rows) if i % TOTAL == CHUNK]
+    # First partition by HALF (account-level), then by CHUNK (job-level within account).
+    # Row i belongs to this job iff it's in this account's half AND this chunk's slice.
+    chunk_rows = [r for i, r in enumerate(all_rows)
+                  if i % NUM_HALVES == HALF and (i // NUM_HALVES) % TOTAL == CHUNK]
     n_keys = len(ALL_KEYS)
     start_key_idx = CHUNK % n_keys
     log(f"start — total queue={len(all_rows)} my chunk={len(chunk_rows)} keys={n_keys} start_key_idx={start_key_idx}")

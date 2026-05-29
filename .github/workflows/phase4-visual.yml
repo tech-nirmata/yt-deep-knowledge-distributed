@@ -41,6 +41,10 @@ jobs:
         env:
           CHUNK_INDEX: ${{ matrix.chunk }}
           TOTAL_CHUNKS: 24
+          # Multi-account partitioning (repo variables; default to whole-queue if unset).
+          # Account A repo: ACCOUNT_HALF=0 NUM_HALVES=2 ; Account B repo: ACCOUNT_HALF=1 NUM_HALVES=2
+          HALF: ${{ vars.ACCOUNT_HALF || '0' }}
+          NUM_HALVES: ${{ vars.NUM_HALVES || '1' }}
           GEMINI_KEYS_JSON: ${{ secrets.GEMINI_KEYS_JSON }}
         run: |
           # stagger chunk starts to avoid thundering herd on shared API quota
