@@ -296,8 +296,15 @@ def main():
     ok = fail = 0
     started = time.time()
     quota_429_hits = 0
+    # Cap runtime so the job EXITS and uploads its artifacts frequently (visible progress
+    # every cycle) instead of running the full 350-min window. The queue is refreshed between
+    # runs (harvest), so the next run resumes on the remaining vids — short chunks are resumable.
+    MAX_RUNTIME_S = int(os.environ.get("MAX_RUNTIME_MIN", "70")) * 60
 
     for i, row in enumerate(chunk_rows, 1):
+        if time.time() - started > MAX_RUNTIME_S:
+            log(f"[{i}/{len(chunk_rows)}] RUNTIME-CAP hit ({MAX_RUNTIME_S//60}min) — exiting to upload artifacts (ok={ok})")
+            break
         channel, url, vid = row[0], row[1], row[2]
         out_file = OUT_DIR / f"{vid}.md"
         if out_file.exists() and out_file.stat().st_size > 200:
