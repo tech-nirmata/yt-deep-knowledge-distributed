@@ -1,0 +1,25 @@
+name: yt-dlp runner viability test
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Install yt-dlp + ffmpeg
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          python3 -m pip install -q --upgrade yt-dlp
+      - name: Try downloading 5 YouTube videos (no cookies) from GitHub IP
+        run: |
+          set +e
+          VIDS="AsKD_YPxnbw mCSmjWALk44 dQw4w9WgXcQ 9bZkp7q19f0 jNQXAC9IVRw"
+          ok=0; fail=0
+          for V in $VIDS; do
+            echo "=== $V ==="
+            yt-dlp -f "worst[ext=mp4]/worst" --max-filesize 80M --no-warnings \
+              --socket-timeout 30 -o "/tmp/$V.mp4" "https://www.youtube.com/watch?v=$V" 2>&1 | tail -3
+            if [ -s "/tmp/$V.mp4" ]; then echo "DOWNLOAD-OK $V ($(du -h /tmp/$V.mp4|cut -f1))"; ok=$((ok+1)); else echo "DOWNLOAD-FAIL $V"; fail=$((fail+1)); fi
+          done
+          echo ""
+          echo "RUNNER-YTDLP-RESULT ok=$ok fail=$fail of 5"
