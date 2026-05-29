@@ -80,15 +80,25 @@ Distinctive moments where energy or gesture significantly changes meaning. Skip 
 
 If video is truly talking-head with zero meaningful visuals beyond speaker's face: write a single sentence saying so and stop."""
 
-# Per-process global state for circuit breakers
-# _cooldown_until[(key_idx, model)] = unix-ts to skip until.
-# Per-minute Gemini RPM limits heal in 60s, so we use a 90s cooldown after N 429s.
-# Per-day RPD limits don't heal within the chunk run, but if cooldown re-tests
-# get hit again immediately, the cooldown re-extends — natural backoff.
-_cooldown_until = {}
+# Per-process global state for circuit breakers.
+# Two DISTINCT failure modes, handled differently (this is the efficiency fix):
+#   • RPM (per-minute) 429  → recovers in ~60s → short cooldown, retry later.
+#   • RPD (per-day)    429  → will NOT recover until midnight-PT reset → mark DEAD for the
+#                              whole run and never retry (old code thrashed these every 90s,
+#                              16,502 wasted retries/run observed). We read the 429 quota metric
+#                              to tell them apart.
+_cooldown_until = {}   # (key_idx, model) -> unix-ts to skip until  (RPM, transient)
+_dead_today = set()    # (key_idx, model) that are RPD-exhausted — skip for the rest of the run
 _429_combo_count = {}  # rolling count per (key,model); resets on success
-MAX_COMBO_429 = 2  # after this many consecutive 429s, enter cooldown
-COOLDOWN_S = 90  # seconds to skip a (key, model) after MAX_COMBO_429
+MAX_COMBO_429 = 2  # after this many consecutive RPM 429s, enter cooldown
+COOLDOWN_S = 90  # seconds to skip a (key, model) after MAX_COMBO_429 (RPM only)
+
+
+def is_rpd_429(err: str) -> bool:
+    """True if the 429 is a per-DAY quota (won't recover today), vs per-minute."""
+    e = err.lower()
+    return ("perday" in e or "per_day" in e or "requestsperday" in e
+            or "generaterequestsperdayperprojectpermodel" in e or "free_tier_requests" in e)
 # Free quota is per-MODEL-per-project-per-day, so EACH model id is a separate daily bucket.
 # Rotating more model ids = more daily capacity on the SAME keys (no new keys/accounts/bans).
 # Ordered best→fallback so every video gets the strongest model that still has quota (no quality
@@ -124,43 +134,55 @@ def get_client(api_key: str) -> "genai.Client":
     return _client_cache[api_key]
 
 
+def is_dead(key_idx: int, model: str) -> bool:
+    """RPD-exhausted for the rest of this run — never retry."""
+    return (key_idx, model) in _dead_today
+
+
+def mark_dead(key_idx: int, model: str, key_suffix: str):
+    """Mark (key, model) daily-exhausted — skipped for the whole run (no more retries)."""
+    if (key_idx, model) not in _dead_today:
+        _dead_today.add((key_idx, model))
+        log(f"  DEAD-TODAY key=***{key_suffix} model={model} (RPD exhausted; {len(_dead_today)}/{len(ALL_KEYS)*len(MODELS)} dead)")
+
+
 def in_cooldown(key_idx: int, model: str) -> bool:
-    """True if this (key, model) is in cooldown right now."""
+    """True if this (key, model) is unavailable now (RPM cooldown OR daily-dead)."""
+    if (key_idx, model) in _dead_today:
+        return True
     until = _cooldown_until.get((key_idx, model), 0)
     return time.time() < until
 
 
 def mark_cooldown(key_idx: int, model: str, key_suffix: str):
-    """Put (key, model) in cooldown for COOLDOWN_S seconds."""
+    """Put (key, model) in short RPM cooldown."""
     _cooldown_until[(key_idx, model)] = time.time() + COOLDOWN_S
-    _429_combo_count[(key_idx, model)] = 0  # reset count; will re-trip if cooldown wasn't enough
-    log(f"  COOLDOWN key=***{key_suffix} model={model} ({MAX_COMBO_429}+ quota) — skip {COOLDOWN_S}s")
+    _429_combo_count[(key_idx, model)] = 0
 
 
 def all_models_cooling(model: str) -> bool:
-    """True if every key has this model cooling down."""
+    """True if every key has this model unavailable (cooling or dead)."""
     return all(in_cooldown(i, model) for i in range(len(ALL_KEYS)))
 
 
 def all_combos_cooling() -> bool:
-    """True if every (key, model) combo is cooling down."""
-    now = time.time()
-    return all(
-        _cooldown_until.get((i, m), 0) > now
-        for i in range(len(ALL_KEYS))
-        for m in MODELS
-    )
+    """True if every (key, model) combo is unavailable (cooling or dead)."""
+    return all(in_cooldown(i, m) for i in range(len(ALL_KEYS)) for m in MODELS)
+
+
+def all_combos_dead() -> bool:
+    """True if EVERY (key, model) is RPD-dead — pointless to continue this run."""
+    return len(_dead_today) >= len(ALL_KEYS) * len(MODELS)
 
 
 def min_cooldown_wait() -> float:
-    """Seconds until the earliest cooldown expires (>=0). Used when all combos cooling."""
+    """Seconds until the earliest RPM cooldown expires. Ignores dead-today combos
+    (they never recover). Returns inf if there are NO live RPM cooldowns to wait on."""
     now = time.time()
-    earliest = min(
-        _cooldown_until.get((i, m), now)
-        for i in range(len(ALL_KEYS))
-        for m in MODELS
-    )
-    return max(0.0, earliest - now)
+    waits = [_cooldown_until.get((i, m), now) - now
+             for i in range(len(ALL_KEYS)) for m in MODELS
+             if (i, m) not in _dead_today and _cooldown_until.get((i, m), 0) > now]
+    return max(0.0, min(waits)) if waits else float("inf")
 
 
 def try_video(url: str, vid: str, start_key_idx: int) -> tuple[str | None, str | None]:
@@ -205,6 +227,10 @@ def try_video(url: str, vid: str, start_key_idx: int) -> tuple[str | None, str |
                 except gerrors.ClientError as e:
                     err = str(e)
                     if "429" in err or "RESOURCE_EXHAUSTED" in err:
+                        # Daily (RPD) quota won't recover today → mark DEAD, never retry.
+                        if is_rpd_429(err):
+                            mark_dead(key_idx, model, key_suffix)
+                            break  # move to next key/model immediately
                         ckey = (key_idx, model)
                         _429_combo_count[ckey] = _429_combo_count.get(ckey, 0) + 1
                         if _429_combo_count[ckey] >= MAX_COMBO_429:
@@ -305,18 +331,27 @@ def main():
         if time.time() - started > MAX_RUNTIME_S:
             log(f"[{i}/{len(chunk_rows)}] RUNTIME-CAP hit ({MAX_RUNTIME_S//60}min) — exiting to upload artifacts (ok={ok})")
             break
+        # EFFICIENCY: if every (key,model) is RPD-dead, the day's free quota is gone — stop
+        # immediately instead of thrashing dead combos for the rest of the window.
+        if all_combos_dead():
+            log(f"[{i}/{len(chunk_rows)}] ALL-RPD-DEAD — daily quota exhausted, exiting early (ok={ok} fail={fail})")
+            break
         channel, url, vid = row[0], row[1], row[2]
         out_file = OUT_DIR / f"{vid}.md"
         if out_file.exists() and out_file.stat().st_size > 200:
             log(f"[{i}/{len(chunk_rows)}] SKIP {vid} (already done)")
             continue
 
-        # short-circuit: if every (key, model) combo is cooling, wait until one expires
+        # If every combo is unavailable: wait only if there are live RPM cooldowns to wait on;
+        # if it's all dead-today (inf wait), exit instead of sleeping pointlessly.
         if all_combos_cooling():
             wait_s = min_cooldown_wait()
+            if wait_s == float("inf"):
+                log(f"[{i}/{len(chunk_rows)}] ALL-DEAD/no-RPM — exiting early (ok={ok} fail={fail})")
+                break
             if wait_s > 0:
-                log(f"[{i}/{len(chunk_rows)}] WAIT-COOLDOWN {vid} sleeping {wait_s:.0f}s (all combos cooling)")
-                time.sleep(min(wait_s + 1, 120))  # cap at 2 min to keep moving
+                log(f"[{i}/{len(chunk_rows)}] WAIT-COOLDOWN {vid} sleeping {wait_s:.0f}s")
+                time.sleep(min(wait_s + 1, 120))
 
         t0 = time.time()
         # rotate starting key per video to spread load further within chunk
