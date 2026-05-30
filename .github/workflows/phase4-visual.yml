@@ -3,11 +3,13 @@ name: Phase 4 — Gemini visual analysis (60 parallel runners, no compromise)
 on:
   workflow_dispatch:
   schedule:
-    # Short-cycle cadence: each chunk runtime-caps at ~70min (MAX_RUNTIME_MIN) then EXITS and
-    # uploads artifacts, so progress is visible every ~2h instead of one big 6h jump. Fire every
-    # 2h; a ~70min run finishes well before the next fires (concurrency group queues any overlap,
-    # never dupes). The 2h harvest trims the queue between runs so short chunks resume on remaining vids.
-    - cron: '0 */2 * * *'
+    # Rolling-quota capture (every 30min). VERIFIED 2026-05-30: Gemini free RPD recovers in a
+    # ROLLING fashion through the day (a key/model dead at 23:00 UTC was live again at 01:31 UTC),
+    # not only at the 07:00 UTC midnight-Pacific bulk reset. The efficiency fix makes a quota-dead
+    # run exit in ~4min (skips RPD-dead combos, no 70min thrash), so polling every 30min is cheap:
+    # dead poll = ~4min + harmless 429s (over-limit 429s consume no quota); live poll = produces up
+    # to the 70min cap. concurrency group (cancel-in-progress:false) queues overlap → never dupes.
+    - cron: '*/30 * * * *'
 
 # Only one cloud run at a time. If a new run is triggered while one is active,
 # the new one waits (does NOT cancel the running one). Eliminates dupe-work.
