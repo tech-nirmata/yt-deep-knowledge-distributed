@@ -70,7 +70,7 @@ INJECTION_PHRASES = [
     # like "do not trust your gut" (47 false positives in the first retro scan).
     r"do not (?:trust|tell|inform|alert|notify) (?:the |your )?(?:user|system|assistant|ai|human|model|previous instructions?|owner|operator|admin)\b",
     r"(?:exfiltrate|leak|send|email|post)\s+(?:the\s+)?(?:api[\s_-]?keys?|keys?|secrets?|credentials?|passwords?|tokens?)",
-    r"(?:print|reveal|output|repeat|reproduce)\s+(?:your|the)\s+(?:system\s+prompt|instructions|api[\s_-]?keys?|secrets?)",
+    r"(?:print|reveal|output|repeat|reproduce)\s+(?:your|the)\s+(?:system\s+prompt|instructions|api[\s_-]?keys?|secret\s+keys?|credentials?|passwords?)",
 ]
 
 _ctrl_re = re.compile("|".join(re.escape(t) for t in CONTROL_TOKENS), re.IGNORECASE)
@@ -154,7 +154,7 @@ def _selftest():
     )
     clean, finds = sanitize(evil)
     assert finds, "should detect injection"
-    assert "<result" not in clean.replace(_ZW, "X").replace("X", ""), "raw <result should be broken"
+    assert "<result" not in clean, "raw <result must be broken by the ZW defang in clean output"
     # the literal dangerous tokens must no longer appear contiguously
     for tok in ["<result>", "tool_use_error", "ignore all previous instructions"]:
         assert tok.lower() not in clean.lower(), f"token {tok!r} still parseable"
